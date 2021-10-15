@@ -205,7 +205,9 @@ class _FlingState extends State<Fling> {
     assert(mounted);
     final box = context.findRenderObject()! as RenderBox;
     assert(box.hasSize);
-    box.showOnScreen(duration: const Duration(milliseconds: 300));
+    box.showOnScreen(
+      duration: FlingNavigator.of(context).widget.duration ~/ 2,
+    );
     setState(() {
       _placeholderSize = box.size;
     });
@@ -257,7 +259,10 @@ class _FlingState extends State<Fling> {
         offstage: showPlaceholder,
         child: TickerMode(
           enabled: !showPlaceholder,
-          child: KeyedSubtree(key: _key, child: widget.child),
+          child: KeyedSubtree(
+            key: _key,
+            child: widget.child,
+          ),
         ),
       ),
     );
