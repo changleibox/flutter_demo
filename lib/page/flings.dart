@@ -205,7 +205,6 @@ class _FlingState extends State<Fling> {
     assert(mounted);
     final box = context.findRenderObject()! as RenderBox;
     assert(box.hasSize);
-    box.showOnScreen(duration: const Duration(milliseconds: 150));
     setState(() {
       _placeholderSize = box.size;
     });
@@ -434,9 +433,11 @@ class _FlingFlight {
     final RenderBox? toFlingBox;
     if (!_aborted && manifest.toFling.mounted) {
       toFlingBox = manifest.toFling.context.findRenderObject() as RenderBox?;
+      toFlingBox?.showOnScreen(duration: const Duration(milliseconds: 150));
     } else {
       toFlingBox = null;
     }
+
     // Try to find the new origin of the toFling, if the flight isn't aborted.
     final Offset? toFlingOrigin;
     if (toFlingBox != null && toFlingBox.attached && toFlingBox.hasSize) {
@@ -877,6 +878,30 @@ class FlingBoundaryState extends State<FlingBoundary> with TickerProviderStateMi
   /// navigator
   FlingNavigatorState? get navigator => FlingNavigator.of(context);
 
+  /// Whether this route is currently offstage.
+  ///
+  /// On the first frame of a route's entrance transition, the route is built
+  /// [Offstage] using an animation progress of 1.0. The route is invisible and
+  /// non-interactive, but each widget has its final size and position. This
+  /// mechanism lets the [HeroController] determine the final local of any hero
+  /// widgets being animated as part of the transition.
+  ///
+  /// The modal barrier, if any, is not rendered if [offstage] is true (see
+  /// [barrierColor]).
+  ///
+  /// Whenever this changes value, [changedInternalState] is called.
+  bool get offstage => _offstage;
+  bool _offstage = false;
+
+  set offstage(bool value) {
+    if (_offstage == value) {
+      return;
+    }
+    setState(() {
+      _offstage = value;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -927,8 +952,13 @@ class FlingController extends FlingNavigatorObserver {
         return;
       }
 
+      // Putting a route offstage changes its animation value to 1.0. Once this
+      // frame completes, we'll know where the heroes in the `to` route are
+      // going to end up, and the `to` route will go back onstage.
+      to!.offstage = to.animation.value == 0.0;
+
       WidgetsBinding.instance!.addPostFrameCallback((Duration value) {
-        _startFlingTransition(from!, to!, animation, tag);
+        _startFlingTransition(from!, to, animation, tag);
       });
     }
   }
@@ -941,6 +971,10 @@ class FlingController extends FlingNavigatorObserver {
     Animation<double> animation,
     Object tag,
   ) {
+    // If the `to` route was offstage, then we're implicitly restoring its
+    // animation value back to what it was before it was "moved" offstage.
+    to.offstage = false;
+
     final navigator = this.navigator;
     final overlay = navigator?.overlay;
     // If the navigator or the overlay was removed before this end-of-frame
