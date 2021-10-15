@@ -93,13 +93,13 @@ class _FlingBlock extends StatelessWidget {
   final ValueChanged<BuildContext>? onPressed;
 
   Widget _buildFlightShuttle(
-      BuildContext flightContext,
-      Animation<double> animation,
-      BuildContext fromFlingContext,
-      BuildContext toFlingContext,
-      Rect fromFlingLocation,
-      Rect toFlingLocation,
-      ) {
+    BuildContext flightContext,
+    Animation<double> animation,
+    BuildContext fromFlingContext,
+    BuildContext toFlingContext,
+    Rect fromFlingLocation,
+    Rect toFlingLocation,
+  ) {
     final startScaleAnimation = CurveTween(
       curve: const Interval(0.0, 0.2, curve: Curves.easeInOut),
     ).animate(animation);
