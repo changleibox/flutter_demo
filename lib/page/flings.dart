@@ -268,7 +268,7 @@ class _FlingState extends State<Fling> {
 class _FlingFlightManifest {
   _FlingFlightManifest({
     required this.overlay,
-    required this.navigator,
+    required this.navigatorSize,
     required this.fromBoundary,
     required this.toBoundary,
     required this.fromFling,
@@ -281,7 +281,7 @@ class _FlingFlightManifest {
         _animation = animation;
 
   final OverlayState overlay;
-  final FlingNavigatorState navigator;
+  final Size navigatorSize;
   final FlingBoundaryState fromBoundary;
   final FlingBoundaryState toBoundary;
   final _FlingState fromFling;
@@ -321,13 +321,13 @@ class _FlingFlightManifest {
   /// The bounding box of [fromFling], in [fromBoundary]'s coordinate space.
   ///
   /// This property should only be accessed in [_FlingFlight.start].
-  late final Rect fromFlingLocation = _boundingBoxFor(fromFling.context, navigator.context);
+  late final Rect fromFlingLocation = _boundingBoxFor(fromFling.context, overlay.context);
 
   /// The bounding box of [toFling], in [toBoundary]'s coordinate space.
   ///
   /// This property should only be accessed in [_FlingFlight.start] or
   /// [_FlingFlight.divert].
-  late final Rect toFlingLocation = _boundingBoxFor(toFling.context, navigator.context);
+  late final Rect toFlingLocation = _boundingBoxFor(toFling.context, overlay.context);
 
   /// Whether this [_FlingFlightManifest] is valid and can be used to start or
   /// divert a [_FlingFlight].
@@ -383,8 +383,13 @@ class _FlingFlight {
       animation: _proxyAnimation,
       child: shuttle,
       builder: (BuildContext context, Widget? child) {
-        return Positioned.fromRect(
-          rect: flingRectTween.evaluate(_proxyAnimation)!,
+        final rect = flingRectTween.evaluate(_proxyAnimation)!;
+        final offsets = RelativeRect.fromSize(rect, manifest.navigatorSize);
+        return Positioned(
+          top: offsets.top,
+          right: offsets.right,
+          bottom: offsets.bottom,
+          left: offsets.left,
           child: IgnorePointer(
             child: RepaintBoundary(
               child: Opacity(
@@ -594,6 +599,7 @@ class FlingNavigator extends StatefulWidget {
 /// [FlingNavigator]
 class FlingNavigatorState extends State<FlingNavigator> with TickerProviderStateMixin {
   final _animations = <AnimationController>[];
+  final _overlayKey = GlobalKey<OverlayState>();
 
   late List<FlingNavigatorObserver> _effectiveObservers;
 
@@ -618,7 +624,7 @@ class FlingNavigatorState extends State<FlingNavigator> with TickerProviderState
   }
 
   /// overlay
-  OverlayState? get overlay => Overlay.of(context, rootOverlay: true);
+  OverlayState? get overlay => _overlayKey.currentState;
 
   /// push
   void push(Object boundaryTag, FlingBoundaryState previousBoundary, Object tag) {
@@ -738,7 +744,16 @@ class FlingNavigatorState extends State<FlingNavigator> with TickerProviderState
 
   @override
   Widget build(BuildContext context) {
-    return widget.child;
+    return Overlay(
+      key: _overlayKey,
+      initialEntries: [
+        OverlayEntry(
+          builder: (context) {
+            return widget.child;
+          },
+        ),
+      ],
+    );
   }
 }
 
@@ -963,7 +978,7 @@ class FlingController extends FlingNavigatorObserver {
         shuttleBuilder ??= _defaultFlingFlightShuttleBuilder;
         manifest = _FlingFlightManifest(
           overlay: overlay,
-          navigator: navigator,
+          navigatorSize: navigatorRenderObject.size,
           fromBoundary: from,
           toBoundary: to,
           fromFling: fromFling,
