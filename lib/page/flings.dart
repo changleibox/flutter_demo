@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 /// Signature for a function that builds a [Fling] placeholder widget given a
@@ -52,6 +53,8 @@ class Fling extends StatefulWidget {
     this.flightShuttleBuilder,
     this.placeholderBuilder,
     required this.child,
+    this.onStartFlight,
+    this.onEndFlight,
   }) : super(key: key);
 
   /// The identifier for this particular fling. If the tag of this fling matches
@@ -118,6 +121,27 @@ class Fling extends StatefulWidget {
   /// push transition, in which case [child] will be a descendant of the placeholder
   /// and will be kept [Offstage] during the Fling's flight.
   final FlingPlaceholderBuilder? placeholderBuilder;
+
+  /// The `shouldIncludeChildInPlaceholder` flag dictates if the child widget of
+  /// this fling should be included in the placeholder widget as a descendant.
+  ///
+  /// When a new fling flight animation takes place, a placeholder widget
+  /// needs to be built to replace the original fling widget. When
+  /// `shouldIncludeChildInPlaceholder` is set to true and `widget.placeholderBuilder`
+  /// is null, the placeholder widget will include the original fling's child
+  /// widget as a descendant, allowing the original element tree to be preserved.
+  ///
+  /// It is typically set to true for the *from* fling in a push transition,
+  /// and false otherwise.
+  final ValueChanged<Size>? onStartFlight;
+
+  /// When `keepPlaceholder` is true, the placeholder will continue to be shown
+  /// after the flight ends. Otherwise the child of the Fling will become visible
+  /// and its TickerMode will be re-enabled.
+  ///
+  /// This method can be safely called even when this [Fling] is currently not in
+  /// a flight.
+  final ValueChanged<Size>? onEndFlight;
 
   // Returns a map of all of the flings in `context` indexed by fling tag that
   // should be considered for animation when `navigator` transitions from one
@@ -208,6 +232,8 @@ class _FlingState extends State<Fling> {
     setState(() {
       _placeholderSize = box.size;
     });
+
+    widget.onStartFlight?.call(_placeholderSize!);
   }
 
   // When `keepPlaceholder` is true, the placeholder will continue to be shown
@@ -221,12 +247,15 @@ class _FlingState extends State<Fling> {
       return;
     }
 
+    final size = _placeholderSize;
     _placeholderSize = null;
     if (mounted) {
       // Tell the widget to rebuild if it's mounted. _placeholderSize has already
       // been updated.
       setState(() {});
     }
+
+    widget.onEndFlight?.call(size!);
   }
 
   @override
