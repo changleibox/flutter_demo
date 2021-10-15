@@ -205,6 +205,7 @@ class _FlingState extends State<Fling> {
     assert(mounted);
     final box = context.findRenderObject()! as RenderBox;
     assert(box.hasSize);
+    box.showOnScreen(duration: const Duration(milliseconds: 300));
     setState(() {
       _placeholderSize = box.size;
     });
