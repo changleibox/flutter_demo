@@ -592,7 +592,7 @@ class FlingNavigator extends StatefulWidget {
   }
 
   /// push
-  static Future<void> push(BuildContext context, Object boundaryTag, Object tag) async {
+  static void push(BuildContext context, Object boundaryTag, Object tag) {
     return FlingNavigator.of(context).push(boundaryTag, FlingBoundary.of(context), tag);
   }
 
