@@ -28,6 +28,7 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
+        backgroundColor: Colors.white,
         middle: Text('测试'),
       ),
       child: FlingWidgetsApp(
