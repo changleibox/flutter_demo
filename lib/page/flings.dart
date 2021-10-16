@@ -205,8 +205,8 @@ class Fling extends StatefulWidget {
   }
 
   /// push
-  static void push(BuildContext context, [Object? boundaryTag, Object? tag]) {
-    Fling.of(context).push(context, boundaryTag, tag);
+  static void push(BuildContext context, {Object? toBoundaryTag, Object? tag}) {
+    Fling.of(context).push(context, toBoundaryTag: toBoundaryTag, tag: tag);
   }
 
   @override
@@ -236,8 +236,13 @@ class FlingState extends State<Fling> {
   bool _shouldIncludeChild = true;
 
   /// push
-  void push(BuildContext context, [Object? boundaryTag, Object? tag]) {
-    FlingNavigator.push(context, boundaryTag ?? FlingBoundary.of(context), tag ?? widget.tag, this);
+  void push(BuildContext context, {Object? toBoundaryTag, Object? tag}) {
+    FlingNavigator.push(
+      context,
+      toBoundaryTag: toBoundaryTag ?? FlingBoundary.of(context),
+      tag: tag ?? widget.tag,
+      fromFling: this,
+    );
   }
 
   // The `shouldIncludeChildInPlaceholder` flag dictates if the child widget of
@@ -616,8 +621,18 @@ class FlingNavigator extends StatefulWidget {
   }
 
   /// push
-  static void push(BuildContext context, Object boundaryTag, Object tag, [FlingState? fromFling]) {
-    return FlingNavigator.of(context).push(boundaryTag, FlingBoundary.of(context), tag, fromFling);
+  static void push(
+    BuildContext context, {
+    required Object toBoundaryTag,
+    required Object tag,
+    FlingState? fromFling,
+  }) {
+    FlingNavigator.of(context).push(
+      fromBoundary: FlingBoundary.of(context),
+      toBoundary: FlingBoundary._boundaryFor(context, toBoundaryTag),
+      tag: tag,
+      fromFling: fromFling,
+    );
   }
 
   @override
@@ -656,10 +671,14 @@ class FlingNavigatorState extends State<FlingNavigator> with TickerProviderState
   OverlayState? get overlay => _overlayKey.currentState;
 
   /// push
-  void push(Object boundaryTag, FlingBoundaryState previousBoundary, Object tag, [FlingState? fromFling]) {
-    final boundary = FlingBoundary._boundaryFor(context, boundaryTag);
+  void push({
+    required FlingBoundaryState fromBoundary,
+    required FlingBoundaryState toBoundary,
+    required Object tag,
+    FlingState? fromFling,
+  }) {
     for (var observer in _effectiveObservers) {
-      observer.didPush(boundary, previousBoundary, tag, fromFling);
+      observer.didPush(toBoundary, fromBoundary, tag, fromFling);
     }
   }
 
