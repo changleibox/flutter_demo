@@ -41,7 +41,7 @@ class _MainPageState extends State<MainPage> {
                 builder: (context) {
                   return _FlingBlock(
                     color: Colors.pink,
-                    onPressed: (value) {
+                    onPressed: (context) {
                       FlingNavigator.push(context, 2, _tag);
                       FlingNavigator.push(context, 3, _tag);
                     },
@@ -60,7 +60,7 @@ class _MainPageState extends State<MainPage> {
                           color: Colors.deepPurple,
                           width: 200,
                           height: 100,
-                          onPressed: (value) {
+                          onPressed: (context) {
                             FlingNavigator.push(context, 1, _tag);
                             FlingNavigator.push(context, 3, _tag);
                           },
@@ -76,7 +76,7 @@ class _MainPageState extends State<MainPage> {
                           color: Colors.teal,
                           width: 100,
                           height: 200,
-                          onPressed: (value) {
+                          onPressed: (context) {
                             FlingNavigator.push(context, 1, _tag);
                             FlingNavigator.push(context, 2, _tag);
                           },
