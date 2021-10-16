@@ -235,11 +235,15 @@ class FlingState extends State<Fling> {
   // in its flight animation). See `startFlight`.
   bool _shouldIncludeChild = true;
 
+  FlingBoundaryState _boundaryFor(Object? tag) {
+    return tag == null ? FlingBoundary.of(context) : FlingBoundary._boundaryFor(context, tag);
+  }
+
   /// push
   void push(BuildContext context, {Object? toBoundaryTag, Object? tag}) {
-    FlingNavigator.push(
-      context,
-      toBoundaryTag: toBoundaryTag ?? FlingBoundary.of(context),
+    FlingNavigator.of(context).push(
+      fromBoundary: FlingBoundary.of(context),
+      toBoundary: _boundaryFor(toBoundaryTag),
       tag: tag ?? widget.tag,
       fromFling: this,
     );
