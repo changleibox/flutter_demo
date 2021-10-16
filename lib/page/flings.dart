@@ -154,7 +154,7 @@ class Fling extends StatefulWidget {
       if (fling == null) {
         throw FlutterError(
           'Fling operation requested with a context that does not include a Fling.\n'
-          'The context used to push or pop boundarys from the Fling must be that of a '
+          'The context used to push boundarys from the Fling must be that of a '
           'widget that is a descendant of a Fling widget.',
         );
       }
@@ -615,7 +615,7 @@ class FlingNavigator extends StatefulWidget {
       if (navigator == null) {
         throw FlutterError(
           'FlingNavigator operation requested with a context that does not include a FlingNavigator.\n'
-          'The context used to push or pop boundarys from the FlingNavigator must be that of a '
+          'The context used to push boundarys from the FlingNavigator must be that of a '
           'widget that is a descendant of a FlingNavigator widget.',
         );
       }
@@ -856,7 +856,7 @@ class FlingBoundary extends StatefulWidget {
       if (boundary == null) {
         throw FlutterError(
           'FlingBoundary operation requested with a context that does not include a FlingBoundary.\n'
-          'The context used to push or pop boundarys from the FlingBoundary must be that of a '
+          'The context used to push boundarys from the FlingBoundary must be that of a '
           'widget that is a descendant of a FlingBoundary widget.',
         );
       }
@@ -915,8 +915,8 @@ class FlingBoundary extends StatefulWidget {
     assert(() {
       if (boundary == null) {
         throw FlutterError(
-          'FlingBoundary operation requested with a context that does not include a FlingBoundary.\n'
-          'The context used to push or pop boundarys from the FlingBoundary must be that of a '
+          'FlingBoundary operation requested with a tag that does not include a FlingBoundary.\n'
+          'The tag used to push boundarys from the FlingBoundary must be that of a '
           'widget that is a descendant of a FlingBoundary widget.',
         );
       }
