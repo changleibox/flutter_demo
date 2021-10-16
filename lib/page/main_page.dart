@@ -140,7 +140,7 @@ class _FlingBlock extends StatelessWidget {
       startInterval: const Interval(0.0, 0.2, curve: Curves.easeInOut),
       middleInterval: const Interval(0.2, 0.7, curve: Curves.linear),
       endInterval: const Interval(0.7, 1.0, curve: Curves.easeOut),
-      builder: (context, bounds, edgeValue, middleValue, fling) {
+      builder: (context, bounds, value, edgeValue, middleValue, fling) {
         final child = (fling.child as _ContextBuilder).child as _ColorBlock;
         return Transform.rotate(
           angle: middleValue * math.pi * 2.0,
@@ -152,7 +152,7 @@ class _FlingBlock extends StatelessWidget {
           ),
         );
       },
-      interpolator: (end, t) {
+      interpolator: (start, end, t) {
         // 二阶贝塞尔曲线
         final Offset control;
         if (end.dx == 0 || end.dy == 0) {
@@ -162,7 +162,8 @@ class _FlingBlock extends StatelessWidget {
         } else {
           control = Offset(end.dx, 0);
         }
-        return control * 2 * t * (1 - t) + end * math.pow(t, 2).toDouble();
+        final vertex = start + control;
+        return start * math.pow(1 - t, 2).toDouble() + vertex * 2 * t * (1 - t) + end * math.pow(t, 2).toDouble();
       },
     );
   }
