@@ -4,6 +4,12 @@ import 'package:flutter_demo/page/flings.dart';
 
 const _tag = '1';
 const _flightShuttleSize = Size.square(40);
+const _flightShuttleRadius = Radius.circular(20);
+const _flightShuttleColor = Colors.green;
+const _flightShuttleChild = FlutterLogo(
+  size: 40,
+  textColor: Colors.white,
+);
 
 /// Created by changlei on 2020/7/6.
 ///
@@ -24,6 +30,9 @@ class _MainPageState extends State<MainPage> {
         middle: Text('测试'),
       ),
       child: FlingWidgetsApp(
+        duration: const Duration(
+          seconds: 3,
+        ),
         child: Row(
           children: [
             Expanded(
@@ -120,6 +129,9 @@ class _FlingBlock extends StatelessWidget {
       curve: const Interval(0.7, 1.0, curve: Curves.easeOut),
     ).animate(animation);
 
+    final fromChild = (fromFlingContext.widget as Fling).child as _ColorBlock;
+    final toChild = (toFlingContext.widget as Fling).child as _ColorBlock;
+
     return Center(
       child: RotationTransition(
         turns: turnsAnimation,
@@ -129,26 +141,14 @@ class _FlingBlock extends StatelessWidget {
             final startValue = startScaleAnimation.value;
             final endValue = endScaleAnimation.value;
             final value = endValue > 0 ? endValue : 1 - startValue;
-            final location = endValue > 0 ? toFlingLocation : fromFlingLocation;
+            final bounds = endValue > 0 ? toFlingLocation : fromFlingLocation;
+            final child = endValue > 0 ? toChild : fromChild;
 
-            var child = (fromFlingContext.widget as Fling).child;
-            if (endValue > 0) {
-              child = (toFlingContext.widget as Fling).child;
-            } else if (value == 0) {
-              child = _ColorBlock(
-                width: _flightShuttleSize.width,
-                height: _flightShuttleSize.height,
-                color: Colors.green,
-              );
-            }
-            return SizedBox.fromSize(
-              size: Size.lerp(_flightShuttleSize, location.size, value),
-              child: AnimatedSwitcher(
-                duration: const Duration(
-                  milliseconds: 80,
-                ),
-                child: child,
-              ),
+            return _ColorBlock.fromSize(
+              size: Size.lerp(_flightShuttleSize, bounds.size, value),
+              color: Color.lerp(_flightShuttleColor, child.color, value),
+              radius: Radius.lerp(_flightShuttleRadius, child.radius, value),
+              child: value == 0 ? _flightShuttleChild : child.child,
             );
           },
         ),
@@ -180,14 +180,28 @@ class _FlingBlock extends StatelessWidget {
 class _ColorBlock extends StatelessWidget {
   const _ColorBlock({
     Key? key,
-    required this.width,
-    required this.height,
-    required this.color,
+    this.width,
+    this.height,
+    this.color,
+    this.radius = const Radius.circular(10),
+    this.child,
   }) : super(key: key);
 
-  final double width;
-  final double height;
-  final Color color;
+  _ColorBlock.fromSize({
+    Key? key,
+    Size? size,
+    this.color,
+    this.radius = const Radius.circular(10),
+    this.child,
+  })  : width = size?.width,
+        height = size?.height,
+        super(key: key);
+
+  final double? width;
+  final double? height;
+  final Color? color;
+  final Radius? radius;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -196,8 +210,10 @@ class _ColorBlock extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.all(radius ?? Radius.zero),
       ),
+      clipBehavior: Clip.antiAlias,
+      child: child,
     );
   }
 }
