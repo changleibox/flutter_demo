@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/page/flings.dart';
 
-const _tag = '1';
 const _flightShuttleSize = Size.square(40);
 const _flightShuttleRadius = Radius.circular(20);
 const _flightShuttleColor = Colors.indigo;
@@ -40,51 +39,49 @@ class _MainPageState extends State<MainPage> {
                 tag: 1,
                 builder: (context) {
                   return _FlingBlock(
+                    tag: 1,
                     color: Colors.pink,
                     onPressed: (context) {
                       Fling.push(context, toBoundaryTag: 2);
-                      Fling.push(context, toBoundaryTag: 3);
+                      Fling.push(context, toBoundaryTag: 2, tag: 2);
                     },
                   );
                 },
               ),
             ),
             Expanded(
-              child: Column(
-                children: [
-                  Expanded(
-                    child: FlingBoundary(
-                      tag: 2,
-                      builder: (context) {
-                        return _FlingBlock(
+              child: FlingBoundary(
+                tag: 2,
+                builder: (context) {
+                  return Column(
+                    children: [
+                      Expanded(
+                        child: _FlingBlock(
+                          tag: 1,
                           color: Colors.deepPurple,
                           width: 200,
                           height: 100,
                           onPressed: (context) {
                             Fling.push(context, toBoundaryTag: 1);
-                            Fling.push(context, toBoundaryTag: 3);
+                            Fling.push(context, tag: 2);
                           },
-                        );
-                      },
-                    ),
-                  ),
-                  Expanded(
-                    child: FlingBoundary(
-                      tag: 3,
-                      builder: (context) {
-                        return _FlingBlock(
+                        ),
+                      ),
+                      Expanded(
+                        child: _FlingBlock(
+                          tag: 2,
                           color: Colors.teal,
                           width: 100,
                           height: 200,
                           onPressed: (context) {
-                            Fling.push(context, toBoundaryTag: 1);
-                            Fling.push(context, toBoundaryTag: 2);
+                            Fling.push(context, toBoundaryTag: 1, tag: 1);
+                            Fling.push(context, tag: 1);
                           },
-                        );
-                      },
-                    ),
-                  ),
-                ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -97,11 +94,14 @@ class _MainPageState extends State<MainPage> {
 class _FlingBlock extends StatelessWidget {
   const _FlingBlock({
     Key? key,
+    required this.tag,
     required this.color,
     this.width,
     this.height,
     required this.onPressed,
   }) : super(key: key);
+
+  final Object tag;
 
   final Color color;
 
@@ -112,13 +112,13 @@ class _FlingBlock extends StatelessWidget {
   final ValueChanged<BuildContext>? onPressed;
 
   static Widget _buildFlightShuttle(
-      BuildContext flightContext,
-      Animation<double> animation,
-      BuildContext fromFlingContext,
-      BuildContext toFlingContext,
-      Rect fromFlingLocation,
-      Rect toFlingLocation,
-      ) {
+    BuildContext flightContext,
+    Animation<double> animation,
+    BuildContext fromFlingContext,
+    BuildContext toFlingContext,
+    Rect fromFlingLocation,
+    Rect toFlingLocation,
+  ) {
     final startScaleAnimation = CurveTween(
       curve: const Interval(0.0, 0.2, curve: Curves.easeInOut),
     ).animate(animation);
@@ -158,18 +158,20 @@ class _FlingBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Fling(
-      tag: _tag,
-      placeholderBuilder: (context, flingSize, child) {
-        return child;
-      },
-      flightShuttleBuilder: _buildFlightShuttle,
-      child: _ContextBuilder(
-        onPressed: onPressed,
-        child: _ColorBlock(
-          width: width ?? 100,
-          height: height ?? 100,
-          color: color,
+    return Center(
+      child: Fling(
+        tag: tag,
+        placeholderBuilder: (context, flingSize, child) {
+          return child;
+        },
+        flightShuttleBuilder: _buildFlightShuttle,
+        child: _ContextBuilder(
+          onPressed: onPressed,
+          child: _ColorBlock(
+            width: width ?? 100,
+            height: height ?? 100,
+            color: color,
+          ),
         ),
       ),
     );
