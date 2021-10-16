@@ -21,6 +21,9 @@ typedef FlightShuttleBuilder = Widget Function(
   Fling fling,
 );
 
+/// 插值器
+typedef FlightShuttleInterpolator = Offset Function(Offset end, double t);
+
 /// Created by changlei on 2020/7/6.
 ///
 /// 测试
@@ -52,8 +55,9 @@ class _MainPageState extends State<MainPage> {
                   tag: 1,
                   color: Colors.pink,
                   onPressed: (context) {
-                    FlingBoundary.push(context, boundaryTag: 2, tag: 1);
+                    Fling.push(context, boundaryTag: 2, tag: 1);
                     Fling.push(context, boundaryTag: 2, tag: 2);
+                    Fling.push(context, boundaryTag: 2, tag: 3);
                   },
                 ),
               ),
@@ -70,7 +74,7 @@ class _MainPageState extends State<MainPage> {
                         width: 200,
                         height: 100,
                         onPressed: (context) {
-                          FlingNavigator.push(context, toBoundaryTag: 1, tag: 1);
+                          Fling.push(context, boundaryTag: 1, tag: 1);
                           Fling.push(context, tag: 2);
                         },
                       ),
@@ -79,11 +83,24 @@ class _MainPageState extends State<MainPage> {
                       child: _FlingBlock(
                         tag: 2,
                         color: Colors.teal,
+                        width: 200,
+                        height: 200,
+                        onPressed: (context) {
+                          Fling.push(context, tag: 1);
+                          Fling.push(context, boundaryTag: 1, tag: 1);
+                          Fling.push(context, tag: 3);
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: _FlingBlock(
+                        tag: 3,
+                        color: Colors.orange,
                         width: 100,
                         height: 200,
                         onPressed: (context) {
+                          Fling.push(context, tag: 2);
                           Fling.push(context, boundaryTag: 1, tag: 1);
-                          Fling.push(context, tag: 1);
                         },
                       ),
                     ),
@@ -132,6 +149,18 @@ class _FlingBlock extends StatelessWidget {
       fromFlingLocation: fromFlingLocation,
       toFlingLocation: toFlingLocation,
       factor: animation,
+      interpolator: (end, t) {
+        // 二阶贝塞尔曲线
+        final Offset control;
+        if (end.dx == 0 || end.dy == 0) {
+          control = Offset.zero;
+        } else if (end.dy < 0) {
+          control = Offset(0, end.dy);
+        } else {
+          control = Offset(end.dx, 0);
+        }
+        return control * 2 * t * (1 - t) + end * math.pow(t, 2).toDouble();
+      },
       builder: (context, bounds, edgeValue, middleValue, fling) {
         final child = (fling.child as _ContextBuilder).child as _ColorBlock;
         return _ColorBlock.fromSize(
@@ -247,6 +276,7 @@ class FlightShuttleTransition extends AnimatedWidget {
     required this.toFlingLocation,
     required this.builder,
     required Animation<double> factor,
+    this.interpolator,
   })  : fromFling = fromFlingContext.widget as Fling,
         toFling = toFlingContext.widget as Fling,
         startAnimation = CurveTween(
@@ -284,6 +314,9 @@ class FlightShuttleTransition extends AnimatedWidget {
   /// 构建child
   final FlightShuttleBuilder builder;
 
+  /// 插值器
+  final FlightShuttleInterpolator? interpolator;
+
   /// The animation that controls the (clipped) [FlightShuttle] of the child.
   Animation<double> get factor => listenable as Animation<double>;
 
@@ -296,11 +329,12 @@ class FlightShuttleTransition extends AnimatedWidget {
     final fling = endValue > 0 ? toFling : fromFling;
 
     final middleValue = middleAnimation.value;
-    final endOffset = fromFlingLocation.center - toFlingLocation.center;
+    final endOffset = toFlingLocation.center - fromFlingLocation.center;
+    final transformed = interpolator?.call(endOffset, middleValue) ?? endOffset;
 
     return Center(
       child: Transform.translate(
-        offset: endOffset * factor.value - endOffset * middleValue,
+        offset: transformed - endOffset * factor.value,
         child: Transform.rotate(
           angle: middleAnimation.value * math.pi * 2.0,
           child: builder(context, bounds, edgeValue, middleValue, fling),
