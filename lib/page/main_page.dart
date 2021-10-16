@@ -49,6 +49,8 @@ class _MainPageState extends State<MainPage> {
                       builder: (context) {
                         return _FlingBlock(
                           color: Colors.blue,
+                          width: 200,
+                          height: 100,
                           onPressed: (value) {
                             FlingNavigator.push(context, 1, _tag);
                             FlingNavigator.push(context, 3, _tag);
@@ -63,6 +65,8 @@ class _MainPageState extends State<MainPage> {
                       builder: (context) {
                         return _FlingBlock(
                           color: Colors.orange,
+                          width: 100,
+                          height: 200,
                           onPressed: (value) {
                             FlingNavigator.push(context, 1, _tag);
                             FlingNavigator.push(context, 2, _tag);
@@ -85,14 +89,20 @@ class _FlingBlock extends StatelessWidget {
   const _FlingBlock({
     Key? key,
     required this.color,
+    this.width,
+    this.height,
     required this.onPressed,
   }) : super(key: key);
 
   final Color color;
 
+  final double? width;
+
+  final double? height;
+
   final ValueChanged<BuildContext>? onPressed;
 
-  Widget _buildFlightShuttle(
+  static Widget _buildFlightShuttle(
     BuildContext flightContext,
     Animation<double> animation,
     BuildContext fromFlingContext,
@@ -125,13 +135,10 @@ class _FlingBlock extends StatelessWidget {
             if (endValue > 0) {
               child = (toFlingContext.widget as Fling).child;
             } else if (value == 0) {
-              child = Container(
+              child = _ColorBlock(
                 width: _flightShuttleSize.width,
                 height: _flightShuttleSize.height,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  color: Colors.green,
-                ),
+                color: Colors.green,
               );
             }
             return SizedBox.fromSize(
@@ -160,14 +167,36 @@ class _FlingBlock extends StatelessWidget {
           return child;
         },
         flightShuttleBuilder: _buildFlightShuttle,
-        child: Container(
-          width: 140,
-          height: 100,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(5),
-          ),
+        child: _ColorBlock(
+          width: width ?? 100,
+          height: height ?? 100,
+          color: color,
         ),
+      ),
+    );
+  }
+}
+
+class _ColorBlock extends StatelessWidget {
+  const _ColorBlock({
+    Key? key,
+    required this.width,
+    required this.height,
+    required this.color,
+  }) : super(key: key);
+
+  final double width;
+  final double height;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(10),
       ),
     );
   }

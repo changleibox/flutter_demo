@@ -36,8 +36,6 @@ typedef FlingFlightShuttleBuilder = Widget Function(
   Rect toFlingLocation,
 );
 
-typedef _OnFlightEnded = void Function(_FlingFlight flight);
-
 /// Created by changlei on 2021/10/15.
 ///
 /// 抛动画
@@ -307,7 +305,6 @@ class _FlingFlightManifest {
     required this.toFling,
     required this.createRectTween,
     required this.shuttleBuilder,
-    required this.isDiverted,
     required Animation<double> animation,
   })  : assert(fromFling.widget.tag == toFling.widget.tag),
         _animation = animation;
@@ -320,7 +317,6 @@ class _FlingFlightManifest {
   final _FlingState toFling;
   final CreateRectTween? createRectTween;
   final FlingFlightShuttleBuilder shuttleBuilder;
-  final bool isDiverted;
   final Animation<double> _animation;
 
   Object get tag => fromFling.widget.tag;
@@ -329,7 +325,7 @@ class _FlingFlightManifest {
     return CurvedAnimation(
       parent: _animation,
       curve: Curves.fastOutSlowIn,
-      reverseCurve: isDiverted ? null : Curves.fastOutSlowIn.flipped,
+      reverseCurve: Curves.fastOutSlowIn.flipped,
     );
   }
 
@@ -368,7 +364,7 @@ class _FlingFlightManifest {
   /// [_FlingFlightManifest], this flag must be checked to ensure the [RectTween]
   /// the [_FlingFlightManifest] produces does not contain coordinates that have
   /// [double.infinity] or [double.nan].
-  late final bool isValid = toFlingLocation.isFinite && (isDiverted || fromFlingLocation.isFinite);
+  late final bool isValid = toFlingLocation.isFinite && fromFlingLocation.isFinite;
 
   @override
   String toString() {
@@ -379,11 +375,9 @@ class _FlingFlightManifest {
 
 // Builds the in-flight fling widget.
 class _FlingFlight {
-  _FlingFlight(this.onFlightEnded) {
+  _FlingFlight() {
     _proxyAnimation = ProxyAnimation()..addStatusListener(_handleAnimationUpdate);
   }
-
-  final _OnFlightEnded onFlightEnded;
 
   late Tween<Rect?> flingRectTween;
   Widget? shuttle;
@@ -449,7 +443,6 @@ class _FlingFlight {
       // hidden instead.
       manifest.fromFling.endFlight(keepPlaceholder: status == AnimationStatus.completed);
       manifest.toFling.endFlight(keepPlaceholder: status == AnimationStatus.dismissed);
-      onFlightEnded(this);
       _proxyAnimation.removeListener(onTick);
     }
   }
@@ -513,38 +506,6 @@ class _FlingFlight {
     manifest.toFling.startFlight();
     manifest.overlay.insert(overlayEntry = OverlayEntry(builder: _buildOverlay));
     _proxyAnimation.addListener(onTick);
-  }
-
-  // While this flight's fling was in transition a push or a pop occurred for
-  // boundarys with the same fling. Redirect the in-flight fling to the new toBoundary.
-  void divert(_FlingFlightManifest newManifest) {
-    assert(manifest.tag == newManifest.tag);
-    // A push or a pop flight is heading to a new boundary, i.e.
-    // manifest.type == _FlingFlightType.push && newManifest.type == _FlingFlightType.push ||
-    // manifest.type == _FlingFlightType.pop && newManifest.type == _FlingFlightType.pop
-    assert(manifest.fromFling != newManifest.fromFling);
-    assert(manifest.toFling != newManifest.toFling);
-
-    flingRectTween = manifest.createFlingRectTween(
-      begin: flingRectTween.evaluate(_proxyAnimation),
-      end: newManifest.toFlingLocation,
-    );
-    shuttle = null;
-
-    _proxyAnimation.parent = newManifest.animation;
-
-    manifest.fromFling.endFlight(keepPlaceholder: true);
-    manifest.toFling.endFlight(keepPlaceholder: true);
-
-    // Let the flings in each of the boundarys rebuild with their placeholders.
-    newManifest.fromFling.startFlight(shouldIncludedChildInPlaceholder: true);
-    newManifest.toFling.startFlight();
-
-    // Let the transition overlay on top of the boundarys also rebuild since
-    // we cleared the old shuttle.
-    overlayEntry!.markNeedsBuild();
-
-    manifest = newManifest;
   }
 
   void abort() {
@@ -632,7 +593,7 @@ class FlingNavigator extends StatefulWidget {
 
 /// [FlingNavigator]
 class FlingNavigatorState extends State<FlingNavigator> with TickerProviderStateMixin {
-  final _animations = <AnimationController>[];
+  final _animations = <Duration, Iterable<AnimationController>>{};
   final _overlayKey = GlobalKey<OverlayState>();
 
   late List<FlingNavigatorObserver> _effectiveObservers;
@@ -641,7 +602,7 @@ class FlingNavigatorState extends State<FlingNavigator> with TickerProviderState
 
   /// animation
   Animation<double> get _animation {
-    final nullableAnimations = <AnimationController?>[..._animations];
+    final nullableAnimations = <AnimationController?>[...?_animations[widget.duration]];
     var controller = nullableAnimations.firstWhere(
       (element) => element?.isCompleted == true,
       orElse: () => null,
@@ -651,8 +612,9 @@ class FlingNavigatorState extends State<FlingNavigator> with TickerProviderState
         duration: widget.duration,
         vsync: this,
       );
-      _animations.add(controller);
+      nullableAnimations.add(controller);
     }
+    _animations[widget.duration] = nullableAnimations.whereType<AnimationController>();
     controller.forward(from: controller.lowerBound);
     return controller;
   }
@@ -770,9 +732,11 @@ class FlingNavigatorState extends State<FlingNavigator> with TickerProviderState
       return true;
     }());
     _updateFlingController(null);
-    while (_animations.isNotEmpty) {
-      _animations.removeLast().dispose();
+    final animations = _animations.values.expand((element) => element);
+    for (var animation in animations) {
+      animation.dispose();
     }
+    _animations.clear();
     super.dispose();
   }
 
@@ -955,10 +919,6 @@ class FlingController extends FlingNavigatorObserver {
   /// If null, the controller uses a linear [RectTween].
   final CreateRectTween? createRectTween;
 
-  // All of the flings that are currently in the overlay and in motion.
-  // Indexed by the fling tag.
-  final _flights = <Object, _FlingFlight>{};
-
   @override
   void didPush(FlingBoundaryState boundary, FlingBoundaryState? previousBoundary, Object tag) {
     _maybeStartFlingTransition(previousBoundary, boundary, boundary.animation, tag);
@@ -1037,7 +997,6 @@ class FlingController extends FlingNavigatorObserver {
         return;
       }
       final tag = fromFling.widget.tag;
-      final existingFlight = _flights[tag];
       _FlingFlightManifest? manifest;
       if (toFling != null) {
         var shuttleBuilder = toFling.widget.flightShuttleBuilder;
@@ -1052,7 +1011,6 @@ class FlingController extends FlingNavigatorObserver {
           toFling: toFling,
           createRectTween: createRectTween,
           shuttleBuilder: shuttleBuilder,
-          isDiverted: existingFlight != null,
           animation: animation,
         );
       }
@@ -1061,39 +1019,15 @@ class FlingController extends FlingNavigatorObserver {
       // flight, and call endFlight when this for loop finishes.
       if (manifest != null && manifest.isValid) {
         toFlings.remove(tag);
-        if (existingFlight != null) {
-          existingFlight.divert(manifest);
-        } else {
-          // _flights[tag] = _FlingFlight(_handleFlightEnded)..start(manifest);
-          _FlingFlight(_handleFlightEnded).start(manifest);
-        }
-      } else {
-        existingFlight?.abort();
+        _FlingFlight().start(manifest);
       }
     }
 
     flight(fromFlings[tag], toFlings[tag]);
 
-    // for (final fromFlingEntry in fromFlings.entries) {
-    //   final tag = fromFlingEntry.key;
-    //   final fromFling = fromFlingEntry.value;
-    //   final toFling = toFlings[tag];
-    //   flight(fromFling, toFling);
-    // }
-
-    // The remaining entries in toFlings are those failed to participate in a
-    // new flight (for not having a valid manifest).
-    //
-    // This can happen in a boundary pop transition when a fromFling is no longer
-    // mounted, or kept alive by the [KeepAlive] mechanism but no longer visible.
-    // TODO(LongCatIsLooong): resume aborted flights: https://github.com/flutter/flutter/issues/72947
     for (final toFling in toFlings.values) {
       toFling.endFlight();
     }
-  }
-
-  void _handleFlightEnded(_FlingFlight flight) {
-    _flights.remove(flight.manifest.tag);
   }
 
   Widget _defaultFlingFlightShuttleBuilder(
