@@ -17,7 +17,7 @@ typedef FlightShuttleBuilder = Widget Function(
   BuildContext context,
   Rect bounds,
   double edgeValue,
-  double transitionValue,
+  double middleValue,
   Fling fling,
 );
 
@@ -132,7 +132,7 @@ class _FlingBlock extends StatelessWidget {
       fromFlingLocation: fromFlingLocation,
       toFlingLocation: toFlingLocation,
       factor: animation,
-      builder: (context, bounds, edgeValue, transitionValue, fling) {
+      builder: (context, bounds, edgeValue, middleValue, fling) {
         final child = (fling.child as _ContextBuilder).child as _ColorBlock;
         return _ColorBlock.fromSize(
           size: Size.lerp(_flightShuttleSize, bounds.size, edgeValue),
@@ -252,7 +252,7 @@ class FlightShuttleTransition extends AnimatedWidget {
         startAnimation = CurveTween(
           curve: const Interval(0.0, 0.2, curve: Curves.easeInOut),
         ).animate(factor),
-        transitionAnimation = CurveTween(
+        middleAnimation = CurveTween(
           curve: const Interval(0.2, 0.7, curve: Curves.linear),
         ).animate(factor),
         endAnimation = CurveTween(
@@ -276,7 +276,7 @@ class FlightShuttleTransition extends AnimatedWidget {
   final Animation<double> startAnimation;
 
   /// 转场
-  final Animation<double> transitionAnimation;
+  final Animation<double> middleAnimation;
 
   /// 结束
   final Animation<double> endAnimation;
@@ -295,15 +295,15 @@ class FlightShuttleTransition extends AnimatedWidget {
     final bounds = endValue > 0 ? toFlingLocation : fromFlingLocation;
     final fling = endValue > 0 ? toFling : fromFling;
 
-    final transitionValue = transitionAnimation.value;
-    final distanceOffset = fromFlingLocation.center - toFlingLocation.center;
+    final middleValue = middleAnimation.value;
+    final endOffset = fromFlingLocation.center - toFlingLocation.center;
 
     return Center(
       child: Transform.translate(
-        offset: distanceOffset * (factor.value - transitionValue),
+        offset: endOffset * factor.value - endOffset * middleValue,
         child: Transform.rotate(
-          angle: transitionAnimation.value * math.pi * 2.0,
-          child: builder(context, bounds, edgeValue, transitionValue, fling),
+          angle: middleAnimation.value * math.pi * 2.0,
+          child: builder(context, bounds, edgeValue, middleValue, fling),
         ),
       ),
     );
