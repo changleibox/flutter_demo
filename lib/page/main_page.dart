@@ -5,7 +5,7 @@ import 'package:flutter_demo/page/flings.dart';
 const _tag = '1';
 const _flightShuttleSize = Size.square(40);
 const _flightShuttleRadius = Radius.circular(20);
-const _flightShuttleColor = Colors.green;
+const _flightShuttleColor = Colors.brown;
 const _flightShuttleChild = FlutterLogo(
   size: 40,
   textColor: Colors.white,
@@ -40,7 +40,7 @@ class _MainPageState extends State<MainPage> {
                 tag: 1,
                 builder: (context) {
                   return _FlingBlock(
-                    color: Colors.red,
+                    color: Colors.pink,
                     onPressed: (value) {
                       FlingNavigator.push(context, 2, _tag);
                       FlingNavigator.push(context, 3, _tag);
@@ -57,7 +57,7 @@ class _MainPageState extends State<MainPage> {
                       tag: 2,
                       builder: (context) {
                         return _FlingBlock(
-                          color: Colors.blue,
+                          color: Colors.deepPurple,
                           width: 200,
                           height: 100,
                           onPressed: (value) {
@@ -73,7 +73,7 @@ class _MainPageState extends State<MainPage> {
                       tag: 3,
                       builder: (context) {
                         return _FlingBlock(
-                          color: Colors.orange,
+                          color: Colors.teal,
                           width: 100,
                           height: 200,
                           onPressed: (value) {
