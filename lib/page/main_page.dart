@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/page/flings.dart';
@@ -115,40 +117,21 @@ class _FlingBlock extends StatelessWidget {
     Rect fromFlingLocation,
     Rect toFlingLocation,
   ) {
-    final startScaleAnimation = CurveTween(
-      curve: const Interval(0.0, 0.2, curve: Curves.easeInOut),
-    ).animate(animation);
-    final turnsAnimation = CurveTween(
-      curve: const Interval(0.2, 0.7, curve: Curves.linear),
-    ).animate(animation);
-    final endScaleAnimation = CurveTween(
-      curve: const Interval(0.7, 1.0, curve: Curves.easeOut),
-    ).animate(animation);
-
-    final fromChild = ((fromFlingContext.widget as Fling).child as _ContextBuilder).child as _ColorBlock;
-    final toChild = ((toFlingContext.widget as Fling).child as _ContextBuilder).child as _ColorBlock;
-
-    return Center(
-      child: RotationTransition(
-        turns: turnsAnimation,
-        child: AnimatedBuilder(
-          animation: animation,
-          builder: (context, child) {
-            final startValue = startScaleAnimation.value;
-            final endValue = endScaleAnimation.value;
-            final value = endValue > 0 ? endValue : 1 - startValue;
-            final bounds = endValue > 0 ? toFlingLocation : fromFlingLocation;
-            final child = endValue > 0 ? toChild : fromChild;
-
-            return _ColorBlock.fromSize(
-              size: Size.lerp(_flightShuttleSize, bounds.size, value),
-              color: Color.lerp(_flightShuttleColor, child.color, value),
-              radius: Radius.lerp(_flightShuttleRadius, child.radius, value),
-              child: value == 0 ? _flightShuttleChild : child.child,
-            );
-          },
-        ),
-      ),
+    return FlightShuttleTransition(
+      fromFlingContext: fromFlingContext,
+      toFlingContext: toFlingContext,
+      fromFlingLocation: fromFlingLocation,
+      toFlingLocation: toFlingLocation,
+      factor: animation,
+      builder: (context, bounds, value, fling) {
+        final child = (fling.child as _ContextBuilder).child as _ColorBlock;
+        return _ColorBlock.fromSize(
+          size: Size.lerp(_flightShuttleSize, bounds.size, value),
+          color: Color.lerp(_flightShuttleColor, child.color, value),
+          radius: Radius.lerp(_flightShuttleRadius, child.radius, value),
+          child: value == 0 ? _flightShuttleChild : child.child,
+        );
+      },
     );
   }
 
@@ -223,15 +206,96 @@ class _ColorBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.all(radius ?? Radius.zero);
     return Container(
       width: width,
       height: height,
       decoration: BoxDecoration(
+        borderRadius: borderRadius,
         color: color,
-        borderRadius: BorderRadius.all(radius ?? Radius.zero),
+      ),
+      foregroundDecoration: BoxDecoration(
+        borderRadius: borderRadius,
+        border: Border.all(
+          color: Colors.black,
+          width: 1,
+        ),
       ),
       clipBehavior: Clip.antiAlias,
       child: child,
+    );
+  }
+}
+
+/// 构造[FlightShuttle]动画
+class FlightShuttleTransition extends AnimatedWidget {
+  /// 构造[FlightShuttle]动画
+  FlightShuttleTransition({
+    Key? key,
+    required BuildContext fromFlingContext,
+    required BuildContext toFlingContext,
+    required this.fromFlingLocation,
+    required this.toFlingLocation,
+    required this.builder,
+    required Animation<double> factor,
+  })  : fromFling = fromFlingContext.widget as Fling,
+        toFling = toFlingContext.widget as Fling,
+        startScaleAnimation = CurveTween(
+          curve: const Interval(0.0, 0.2, curve: Curves.easeInOut),
+        ).animate(factor),
+        turnsAnimation = CurveTween(
+          curve: const Interval(0.2, 0.7, curve: Curves.linear),
+        ).animate(factor),
+        endScaleAnimation = CurveTween(
+          curve: const Interval(0.7, 1.0, curve: Curves.easeOut),
+        ).animate(factor),
+        super(key: key, listenable: factor);
+
+  /// fromChild
+  final Fling fromFling;
+
+  /// toChild
+  final Fling toFling;
+
+  /// fromLocation
+  final Rect fromFlingLocation;
+
+  /// toLocation
+  final Rect toFlingLocation;
+
+  /// startScale
+  final Animation<double> startScaleAnimation;
+
+  /// turns
+  final Animation<double> turnsAnimation;
+
+  /// endScale
+  final Animation<double> endScaleAnimation;
+
+  /// 构建child
+  final Widget Function(BuildContext context, Rect bounds, double value, Fling fling) builder;
+
+  /// The animation that controls the (clipped) [FlightShuttle] of the child.
+  Animation<double> get factor => listenable as Animation<double>;
+
+  @override
+  Widget build(BuildContext context) {
+    final startValue = startScaleAnimation.value;
+    final endValue = endScaleAnimation.value;
+    final value = endValue > 0 ? endValue : 1 - startValue;
+    final bounds = endValue > 0 ? toFlingLocation : fromFlingLocation;
+    final fling = endValue > 0 ? toFling : fromFling;
+
+    final distanceOffset = fromFlingLocation.center - toFlingLocation.center;
+
+    return Center(
+      child: Transform.translate(
+        offset: distanceOffset * (factor.value - turnsAnimation.value),
+        child: Transform.rotate(
+          angle: turnsAnimation.value * math.pi * 2.0,
+          child: builder(context, bounds, value, fling),
+        ),
+      ),
     );
   }
 }
