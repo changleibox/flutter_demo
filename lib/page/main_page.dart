@@ -12,6 +12,15 @@ const _flightShuttleChild = FlutterLogo(
   textColor: Colors.white,
 );
 
+/// 自定义的[FlightShuttle]动画
+typedef FlightShuttleBuilder = Widget Function(
+  BuildContext context,
+  Rect bounds,
+  double edgeValue,
+  double transitionValue,
+  Fling fling,
+);
+
 /// Created by changlei on 2020/7/6.
 ///
 /// 测试
@@ -123,13 +132,13 @@ class _FlingBlock extends StatelessWidget {
       fromFlingLocation: fromFlingLocation,
       toFlingLocation: toFlingLocation,
       factor: animation,
-      builder: (context, bounds, value, fling) {
+      builder: (context, bounds, edgeValue, transitionValue, fling) {
         final child = (fling.child as _ContextBuilder).child as _ColorBlock;
         return _ColorBlock.fromSize(
-          size: Size.lerp(_flightShuttleSize, bounds.size, value),
-          color: Color.lerp(_flightShuttleColor, child.color, value),
-          radius: Radius.lerp(_flightShuttleRadius, child.radius, value),
-          child: value == 0 ? _flightShuttleChild : child.child,
+          size: Size.lerp(_flightShuttleSize, bounds.size, edgeValue),
+          color: Color.lerp(_flightShuttleColor, child.color, edgeValue),
+          radius: Radius.lerp(_flightShuttleRadius, child.radius, edgeValue),
+          child: edgeValue == 0 ? _flightShuttleChild : child.child,
         );
       },
     );
@@ -240,13 +249,13 @@ class FlightShuttleTransition extends AnimatedWidget {
     required Animation<double> factor,
   })  : fromFling = fromFlingContext.widget as Fling,
         toFling = toFlingContext.widget as Fling,
-        startScaleAnimation = CurveTween(
+        startAnimation = CurveTween(
           curve: const Interval(0.0, 0.2, curve: Curves.easeInOut),
         ).animate(factor),
-        turnsAnimation = CurveTween(
+        transitionAnimation = CurveTween(
           curve: const Interval(0.2, 0.7, curve: Curves.linear),
         ).animate(factor),
-        endScaleAnimation = CurveTween(
+        endAnimation = CurveTween(
           curve: const Interval(0.7, 1.0, curve: Curves.easeOut),
         ).animate(factor),
         super(key: key, listenable: factor);
@@ -263,37 +272,39 @@ class FlightShuttleTransition extends AnimatedWidget {
   /// toLocation
   final Rect toFlingLocation;
 
-  /// startScale
-  final Animation<double> startScaleAnimation;
+  /// 开始
+  final Animation<double> startAnimation;
 
-  /// turns
-  final Animation<double> turnsAnimation;
+  /// 转场
+  final Animation<double> transitionAnimation;
 
-  /// endScale
-  final Animation<double> endScaleAnimation;
+  /// 结束
+  final Animation<double> endAnimation;
 
   /// 构建child
-  final Widget Function(BuildContext context, Rect bounds, double value, Fling fling) builder;
+  final FlightShuttleBuilder builder;
 
   /// The animation that controls the (clipped) [FlightShuttle] of the child.
   Animation<double> get factor => listenable as Animation<double>;
 
   @override
   Widget build(BuildContext context) {
-    final startValue = startScaleAnimation.value;
-    final endValue = endScaleAnimation.value;
-    final value = endValue > 0 ? endValue : 1 - startValue;
+    final startValue = startAnimation.value;
+    final endValue = endAnimation.value;
+    final edgeValue = endValue > 0 ? endValue : 1 - startValue;
     final bounds = endValue > 0 ? toFlingLocation : fromFlingLocation;
     final fling = endValue > 0 ? toFling : fromFling;
 
     final distanceOffset = fromFlingLocation.center - toFlingLocation.center;
 
+    final transitionValue = transitionAnimation.value;
+
     return Center(
       child: Transform.translate(
-        offset: distanceOffset * (factor.value - turnsAnimation.value),
+        offset: distanceOffset * (factor.value - transitionValue),
         child: Transform.rotate(
-          angle: turnsAnimation.value * math.pi * 2.0,
-          child: builder(context, bounds, value, fling),
+          angle: transitionAnimation.value * math.pi * 2.0,
+          child: builder(context, bounds, edgeValue, transitionValue, fling),
         ),
       ),
     );
