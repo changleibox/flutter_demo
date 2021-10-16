@@ -235,15 +235,11 @@ class FlingState extends State<Fling> {
   // in its flight animation). See `startFlight`.
   bool _shouldIncludeChild = true;
 
-  FlingBoundaryState _boundaryFor(Object? tag) {
-    return tag == null ? FlingBoundary.of(context) : FlingBoundary._boundaryFor(context, tag);
-  }
-
   /// push
   void push(BuildContext context, {Object? boundaryTag, Object? tag}) {
     FlingNavigator.of(context)._push(
       fromBoundary: FlingBoundary.of(context),
-      toBoundary: _boundaryFor(boundaryTag),
+      toBoundary: FlingBoundary._boundaryFor(context, boundaryTag),
       tag: tag ?? widget.tag,
       fromFling: this,
     );
@@ -632,14 +628,10 @@ class FlingNavigator extends StatefulWidget {
     required Object tag,
   }) {
     FlingNavigator.of(context).push(
-      fromBoundary: _boundaryFor(context, fromBoundaryTag),
-      toBoundary: _boundaryFor(context, toBoundaryTag),
+      fromBoundary: FlingBoundary._boundaryFor(context, fromBoundaryTag),
+      toBoundary: FlingBoundary._boundaryFor(context, toBoundaryTag),
       tag: tag,
     );
-  }
-
-  static FlingBoundaryState _boundaryFor(BuildContext context, Object? tag) {
-    return tag == null ? FlingBoundary.of(context) : FlingBoundary._boundaryFor(context, tag);
   }
 
   @override
@@ -873,10 +865,10 @@ class FlingBoundary extends StatefulWidget {
   // Returns a map of all of the flings in `context` indexed by fling tag that
   // should be considered for animation when `navigator` transitions from one
   // FlingBoundary to another.
-  static FlingBoundaryState _boundaryFor(
-    BuildContext context,
-    Object tag,
-  ) {
+  static FlingBoundaryState _boundaryFor(BuildContext context, Object? tag) {
+    if (tag == null) {
+      return of(context);
+    }
     final result = <Object, FlingBoundaryState>{};
 
     void inviteFling(StatefulElement fling, Object tag) {
