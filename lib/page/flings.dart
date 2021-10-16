@@ -241,7 +241,7 @@ class FlingState extends State<Fling> {
 
   /// push
   void push(BuildContext context, {Object? toBoundaryTag, Object? tag}) {
-    FlingNavigator.of(context).push(
+    FlingNavigator.of(context)._push(
       fromBoundary: FlingBoundary.of(context),
       toBoundary: _boundaryFor(toBoundaryTag),
       tag: tag ?? widget.tag,
@@ -629,13 +629,11 @@ class FlingNavigator extends StatefulWidget {
     BuildContext context, {
     required Object toBoundaryTag,
     required Object tag,
-    FlingState? fromFling,
   }) {
     FlingNavigator.of(context).push(
       fromBoundary: FlingBoundary.of(context),
       toBoundary: FlingBoundary._boundaryFor(context, toBoundaryTag),
       tag: tag,
-      fromFling: fromFling,
     );
   }
 
@@ -676,6 +674,19 @@ class FlingNavigatorState extends State<FlingNavigator> with TickerProviderState
 
   /// push
   void push({
+    required FlingBoundaryState fromBoundary,
+    required FlingBoundaryState toBoundary,
+    required Object tag,
+  }) {
+    _push(
+      fromBoundary: fromBoundary,
+      toBoundary: toBoundary,
+      tag: tag,
+    );
+  }
+
+  /// push
+  void _push({
     required FlingBoundaryState fromBoundary,
     required FlingBoundaryState toBoundary,
     required Object tag,
