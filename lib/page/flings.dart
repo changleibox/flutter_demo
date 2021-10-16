@@ -205,8 +205,8 @@ class Fling extends StatefulWidget {
   }
 
   /// push
-  static void push(BuildContext context, {Object? toBoundaryTag, Object? tag}) {
-    Fling.of(context).push(context, toBoundaryTag: toBoundaryTag, tag: tag);
+  static void push(BuildContext context, {Object? boundaryTag, Object? tag}) {
+    Fling.of(context).push(context, boundaryTag: boundaryTag, tag: tag);
   }
 
   @override
@@ -240,10 +240,10 @@ class FlingState extends State<Fling> {
   }
 
   /// push
-  void push(BuildContext context, {Object? toBoundaryTag, Object? tag}) {
+  void push(BuildContext context, {Object? boundaryTag, Object? tag}) {
     FlingNavigator.of(context)._push(
       fromBoundary: FlingBoundary.of(context),
-      toBoundary: _boundaryFor(toBoundaryTag),
+      toBoundary: _boundaryFor(boundaryTag),
       tag: tag ?? widget.tag,
       fromFling: this,
     );
@@ -627,14 +627,19 @@ class FlingNavigator extends StatefulWidget {
   /// push
   static void push(
     BuildContext context, {
-    required Object toBoundaryTag,
+    Object? fromBoundaryTag,
+    Object? toBoundaryTag,
     required Object tag,
   }) {
     FlingNavigator.of(context).push(
-      fromBoundary: FlingBoundary.of(context),
-      toBoundary: FlingBoundary._boundaryFor(context, toBoundaryTag),
+      fromBoundary: _boundaryFor(context, fromBoundaryTag),
+      toBoundary: _boundaryFor(context, toBoundaryTag),
       tag: tag,
     );
+  }
+
+  static FlingBoundaryState _boundaryFor(BuildContext context, Object? tag) {
+    return tag == null ? FlingBoundary.of(context) : FlingBoundary._boundaryFor(context, tag);
   }
 
   @override

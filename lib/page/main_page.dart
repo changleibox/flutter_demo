@@ -42,8 +42,8 @@ class _MainPageState extends State<MainPage> {
                     tag: 1,
                     color: Colors.pink,
                     onPressed: (context) {
-                      Fling.push(context, toBoundaryTag: 2);
-                      Fling.push(context, toBoundaryTag: 2, tag: 2);
+                      Fling.push(context, boundaryTag: 2);
+                      Fling.push(context, boundaryTag: 2, tag: 2);
                     },
                   );
                 },
@@ -62,7 +62,7 @@ class _MainPageState extends State<MainPage> {
                           width: 200,
                           height: 100,
                           onPressed: (context) {
-                            Fling.push(context, toBoundaryTag: 1);
+                            Fling.push(context, boundaryTag: 1);
                             Fling.push(context, tag: 2);
                           },
                         ),
@@ -74,7 +74,7 @@ class _MainPageState extends State<MainPage> {
                           width: 100,
                           height: 200,
                           onPressed: (context) {
-                            Fling.push(context, toBoundaryTag: 1, tag: 1);
+                            Fling.push(context, boundaryTag: 1, tag: 1);
                             Fling.push(context, tag: 1);
                           },
                         ),
