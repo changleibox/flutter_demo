@@ -621,12 +621,7 @@ class FlingNavigator extends StatefulWidget {
   }
 
   /// push
-  static void push(
-    BuildContext context, {
-    Object? fromBoundaryTag,
-    Object? toBoundaryTag,
-    required Object tag,
-  }) {
+  static void push(BuildContext context, {Object? fromBoundaryTag, Object? toBoundaryTag, required Object tag}) {
     FlingNavigator.of(context).push(
       fromBoundary: FlingBoundary._boundaryFor(context, fromBoundaryTag),
       toBoundary: FlingBoundary._boundaryFor(context, toBoundaryTag),
@@ -670,16 +665,8 @@ class FlingNavigatorState extends State<FlingNavigator> with TickerProviderState
   OverlayState? get overlay => _overlayKey.currentState;
 
   /// push
-  void push({
-    required FlingBoundaryState fromBoundary,
-    required FlingBoundaryState toBoundary,
-    required Object tag,
-  }) {
-    _push(
-      fromBoundary: fromBoundary,
-      toBoundary: toBoundary,
-      tag: tag,
-    );
+  void push({required FlingBoundaryState fromBoundary, required FlingBoundaryState toBoundary, required Object tag}) {
+    _push(fromBoundary: fromBoundary, toBoundary: toBoundary, tag: tag);
   }
 
   /// push
@@ -922,6 +909,14 @@ class FlingBoundary extends StatefulWidget {
     return boundary!;
   }
 
+  /// push
+  static void push(BuildContext context, {Object? boundaryTag, required Object tag}) {
+    FlingBoundary.of(context).push(
+      boundary: boundaryTag == null ? null : FlingBoundary._boundaryFor(context, boundaryTag),
+      tag: tag,
+    );
+  }
+
   @override
   State<FlingBoundary> createState() => FlingBoundaryState();
 }
@@ -930,6 +925,11 @@ class FlingBoundary extends StatefulWidget {
 class FlingBoundaryState extends State<FlingBoundary> with TickerProviderStateMixin {
   /// navigator
   FlingNavigatorState? get navigator => FlingNavigator.of(context);
+
+  /// push
+  void push({FlingBoundaryState? boundary, required Object tag}) {
+    FlingNavigator.of(context).push(fromBoundary: this, toBoundary: boundary ?? this, tag: tag);
+  }
 
   /// Whether this route is currently offstage.
   ///
