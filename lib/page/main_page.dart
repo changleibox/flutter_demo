@@ -295,9 +295,8 @@ class FlightShuttleTransition extends AnimatedWidget {
     final bounds = endValue > 0 ? toFlingLocation : fromFlingLocation;
     final fling = endValue > 0 ? toFling : fromFling;
 
-    final distanceOffset = fromFlingLocation.center - toFlingLocation.center;
-
     final transitionValue = transitionAnimation.value;
+    final distanceOffset = fromFlingLocation.center - toFlingLocation.center;
 
     return Center(
       child: Transform.translate(
