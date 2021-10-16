@@ -57,6 +57,15 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.2.0"
+  fling:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "7467e103e1bb94ded2fdc19cb83605d07ddfba0e"
+      url: "https://github.com/changleibox/fling.git"
+    source: git
+    version: "0.0.1"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -172,3 +181,4 @@ packages:
     version: "2.1.0"
 sdks:
   dart: ">=2.14.0 <3.0.0"
+  flutter: ">=1.17.0"
