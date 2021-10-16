@@ -141,13 +141,32 @@ class Fling extends StatefulWidget {
   /// a flight.
   final ValueChanged<Size>? onEndFlight;
 
+  /// This method can be expensive (it walks the element tree).
+  static _FlingState of(BuildContext context) {
+    // Handles the case where the input context is a fling element.
+    _FlingState? fling;
+    if (context is StatefulElement && context.state is _FlingState) {
+      fling = context.state as _FlingState;
+    }
+    fling = fling ?? context.findAncestorStateOfType<_FlingState>();
+
+    assert(() {
+      if (fling == null) {
+        throw FlutterError(
+          'Fling operation requested with a context that does not include a Fling.\n'
+          'The context used to push or pop boundarys from the Fling must be that of a '
+          'widget that is a descendant of a Fling widget.',
+        );
+      }
+      return true;
+    }());
+    return fling!;
+  }
+
   // Returns a map of all of the flings in `context` indexed by fling tag that
   // should be considered for animation when `navigator` transitions from one
   // FlingBoundary to another.
-  static Map<Object, _FlingState> _allFlingsFor(
-    BuildContext context,
-    FlingNavigatorState navigator,
-  ) {
+  static Map<Object, _FlingState> _allFlingsFor(BuildContext context) {
     final result = <Object, _FlingState>{};
 
     void inviteFling(StatefulElement fling, Object tag) {
@@ -183,6 +202,11 @@ class Fling extends StatefulWidget {
 
     context.visitChildElements(visitor);
     return result;
+  }
+
+  /// push
+  static void push(BuildContext context, Object boundaryTag, Object tag) {
+    FlingNavigator.push(context, boundaryTag, tag, Fling.of(context));
   }
 
   @override
@@ -306,8 +330,7 @@ class _FlingFlightManifest {
     required this.createRectTween,
     required this.shuttleBuilder,
     required Animation<double> animation,
-  })  : assert(fromFling.widget.tag == toFling.widget.tag),
-        _animation = animation;
+  }) : _animation = animation;
 
   final OverlayState overlay;
   final Size navigatorSize;
@@ -531,7 +554,12 @@ class FlingNavigatorObserver {
   ///
   /// The boundary immediately below that one, and thus the previously active
   /// boundary, is `previousBoundary`.
-  void didPush(FlingBoundaryState boundary, FlingBoundaryState? previousBoundary, Object tag) {}
+  void didPush(
+    FlingBoundaryState boundary,
+    FlingBoundaryState? previousBoundary,
+    Object tag, [
+    _FlingState? fromFling,
+  ]) {}
 }
 
 /// 处理Fling
@@ -583,8 +611,8 @@ class FlingNavigator extends StatefulWidget {
   }
 
   /// push
-  static void push(BuildContext context, Object boundaryTag, Object tag) {
-    return FlingNavigator.of(context).push(boundaryTag, FlingBoundary.of(context), tag);
+  static void push(BuildContext context, Object boundaryTag, Object tag, [_FlingState? fromFling]) {
+    return FlingNavigator.of(context).push(boundaryTag, FlingBoundary.of(context), tag, fromFling);
   }
 
   @override
@@ -623,11 +651,10 @@ class FlingNavigatorState extends State<FlingNavigator> with TickerProviderState
   OverlayState? get overlay => _overlayKey.currentState;
 
   /// push
-  void push(Object boundaryTag, FlingBoundaryState previousBoundary, Object tag) {
+  void push(Object boundaryTag, FlingBoundaryState previousBoundary, Object tag, [_FlingState? fromFling]) {
     final boundary = FlingBoundary._boundaryFor(context, boundaryTag);
-    assert(boundary != previousBoundary, '不能在同一个`FlingBoundary`做动画');
     for (var observer in _effectiveObservers) {
-      observer.didPush(boundary, previousBoundary, tag);
+      observer.didPush(boundary, previousBoundary, tag, fromFling);
     }
   }
 
@@ -920,8 +947,13 @@ class FlingController extends FlingNavigatorObserver {
   final CreateRectTween? createRectTween;
 
   @override
-  void didPush(FlingBoundaryState boundary, FlingBoundaryState? previousBoundary, Object tag) {
-    _maybeStartFlingTransition(previousBoundary, boundary, boundary.animation, tag);
+  void didPush(
+    FlingBoundaryState boundary,
+    FlingBoundaryState? previousBoundary,
+    Object tag, [
+    _FlingState? fromFling,
+  ]) {
+    _maybeStartFlingTransition(previousBoundary, boundary, boundary.animation, tag, fromFling);
   }
 
   // If we're transitioning between different page boundarys, start a fling transition
@@ -930,26 +962,25 @@ class FlingController extends FlingNavigatorObserver {
     FlingBoundaryState? fromBoundary,
     FlingBoundaryState? toBoundary,
     Animation<double> animation,
-    Object tag,
-  ) {
-    if (toBoundary != fromBoundary) {
-      final from = fromBoundary;
-      final to = toBoundary;
+    Object tag, [
+    _FlingState? fromFling,
+  ]) {
+    final from = fromBoundary;
+    final to = toBoundary;
 
-      // A user gesture may have already completed the pop, or we might be the initial boundary
-      if (animation.value == 1.0) {
-        return;
-      }
-
-      // Putting a route offstage changes its animation value to 1.0. Once this
-      // frame completes, we'll know where the heroes in the `to` route are
-      // going to end up, and the `to` route will go back onstage.
-      to!.offstage = to.animation.value == 0.0;
-
-      WidgetsBinding.instance!.addPostFrameCallback((Duration value) {
-        _startFlingTransition(from!, to, animation, tag);
-      });
+    // A user gesture may have already completed the pop, or we might be the initial boundary
+    if (animation.value == 1.0) {
+      return;
     }
+
+    // Putting a route offstage changes its animation value to 1.0. Once this
+    // frame completes, we'll know where the heroes in the `to` route are
+    // going to end up, and the `to` route will go back onstage.
+    to!.offstage = to.animation.value == 0.0;
+
+    WidgetsBinding.instance!.addPostFrameCallback((Duration value) {
+      _startFlingTransition(from!, to, animation, tag, fromFling);
+    });
   }
 
   // Find the matching pairs of flings in from and to and either start or a new
@@ -958,8 +989,9 @@ class FlingController extends FlingNavigatorObserver {
     FlingBoundaryState from,
     FlingBoundaryState to,
     Animation<double> animation,
-    Object tag,
-  ) {
+    Object tag, [
+    _FlingState? fromFling,
+  ]) {
     // If the `to` route was offstage, then we're implicitly restoring its
     // animation value back to what it was before it was "moved" offstage.
     to.offstage = false;
@@ -989,8 +1021,8 @@ class FlingController extends FlingNavigatorObserver {
     //
     // If `fromSubtreeContext` is null, call endFlight on all toFlings, for good measure.
     // If `toSubtreeContext` is null abort existingFlights.
-    final fromFlings = Fling._allFlingsFor(from.context, navigator);
-    final toFlings = Fling._allFlingsFor(to.context, navigator);
+    final fromFlings = fromFling == null ? Fling._allFlingsFor(from.context) : {tag: fromFling};
+    final toFlings = Fling._allFlingsFor(to.context);
 
     void flight(_FlingState? fromFling, _FlingState? toFling) {
       if (fromFling == null) {

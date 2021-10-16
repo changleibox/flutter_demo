@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/page/flings.dart';
 
-const _tag = '1';
 const _flightShuttleSize = Size.square(40);
 const _flightShuttleRadius = Radius.circular(20);
 const _flightShuttleColor = Colors.brown;
@@ -10,6 +9,8 @@ const _flightShuttleChild = FlutterLogo(
   size: 40,
   textColor: Colors.white,
 );
+const _boundaryTag1 = 1;
+const _boundaryTag2 = 2;
 
 /// Created by changlei on 2020/7/6.
 ///
@@ -37,54 +38,42 @@ class _MainPageState extends State<MainPage> {
           children: [
             Expanded(
               child: FlingBoundary(
-                tag: 1,
+                tag: _boundaryTag1,
                 builder: (context) {
                   return _FlingBlock(
+                    tag: 1,
                     color: Colors.pink,
-                    onPressed: (value) {
-                      FlingNavigator.push(context, 2, _tag);
-                      FlingNavigator.push(context, 3, _tag);
+                    onPressed: (context) {
+                      Fling.push(context, _boundaryTag2, 9);
                     },
                   );
                 },
               ),
             ),
             Expanded(
-              child: Column(
-                children: [
-                  Expanded(
-                    child: FlingBoundary(
-                      tag: 2,
-                      builder: (context) {
-                        return _FlingBlock(
-                          color: Colors.deepPurple,
-                          width: 200,
-                          height: 100,
-                          onPressed: (value) {
-                            FlingNavigator.push(context, 1, _tag);
-                            FlingNavigator.push(context, 3, _tag);
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                  Expanded(
-                    child: FlingBoundary(
-                      tag: 3,
-                      builder: (context) {
-                        return _FlingBlock(
-                          color: Colors.teal,
-                          width: 100,
-                          height: 200,
-                          onPressed: (value) {
-                            FlingNavigator.push(context, 1, _tag);
-                            FlingNavigator.push(context, 2, _tag);
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ],
+              child: FlingBoundary(
+                tag: _boundaryTag2,
+                builder: (context) {
+                  return ListView.separated(
+                    itemCount: 100,
+                    itemBuilder: (context, index) {
+                      return _FlingBlock(
+                        tag: index,
+                        color: [Colors.deepPurple, Colors.teal][index % 2],
+                        width: double.infinity,
+                        height: 100,
+                        onPressed: (context) {
+                          Fling.push(context, _boundaryTag2, 1);
+                        },
+                      );
+                    },
+                    separatorBuilder: (context, index) {
+                      return const SizedBox(
+                        height: 10,
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ],
@@ -97,11 +86,14 @@ class _MainPageState extends State<MainPage> {
 class _FlingBlock extends StatelessWidget {
   const _FlingBlock({
     Key? key,
+    required this.tag,
     required this.color,
     this.width,
     this.height,
     required this.onPressed,
   }) : super(key: key);
+
+  final Object tag;
 
   final Color color;
 
@@ -129,8 +121,8 @@ class _FlingBlock extends StatelessWidget {
       curve: const Interval(0.7, 1.0, curve: Curves.easeOut),
     ).animate(animation);
 
-    final fromChild = (fromFlingContext.widget as Fling).child as _ColorBlock;
-    final toChild = (toFlingContext.widget as Fling).child as _ColorBlock;
+    final fromChild = ((fromFlingContext.widget as Fling).child as _ContextBuilder).child as _ColorBlock;
+    final toChild = ((toFlingContext.widget as Fling).child as _ContextBuilder).child as _ColorBlock;
 
     return Center(
       child: RotationTransition(
@@ -158,21 +150,41 @@ class _FlingBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoButton(
-      padding: EdgeInsets.zero,
-      onPressed: () => onPressed?.call(context),
-      child: Fling(
-        tag: _tag,
-        placeholderBuilder: (context, flingSize, child) {
-          return child;
-        },
-        flightShuttleBuilder: _buildFlightShuttle,
+    return Fling(
+      tag: tag,
+      placeholderBuilder: (context, flingSize, child) {
+        return child;
+      },
+      flightShuttleBuilder: _buildFlightShuttle,
+      child: _ContextBuilder(
+        onPressed: onPressed,
         child: _ColorBlock(
           width: width ?? 100,
           height: height ?? 100,
           color: color,
         ),
       ),
+    );
+  }
+}
+
+class _ContextBuilder extends StatelessWidget {
+  const _ContextBuilder({
+    Key? key,
+    required this.child,
+    this.onPressed,
+  }) : super(key: key);
+
+  final Widget child;
+  final ValueChanged<BuildContext>? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      minSize: 0,
+      onPressed: () => onPressed?.call(context),
+      child: child,
     );
   }
 }
