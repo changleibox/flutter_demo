@@ -823,12 +823,12 @@ class FlingBoundary extends StatefulWidget {
   /// 创建一个[Fling]边界
   const FlingBoundary({
     Key? key,
-    required this.builder,
+    required this.child,
     required this.tag,
   }) : super(key: key);
 
   /// child
-  final WidgetBuilder builder;
+  final Widget child;
 
   /// tag
   final Object tag;
@@ -957,9 +957,7 @@ class FlingBoundaryState extends State<FlingBoundary> with TickerProviderStateMi
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: widget.builder(context),
-    );
+    return widget.child;
   }
 }
 

@@ -37,51 +37,47 @@ class _MainPageState extends State<MainPage> {
             Expanded(
               child: FlingBoundary(
                 tag: 1,
-                builder: (context) {
-                  return _FlingBlock(
-                    tag: 1,
-                    color: Colors.pink,
-                    onPressed: (context) {
-                      Fling.push(context, boundaryTag: 2);
-                      Fling.push(context, boundaryTag: 2, tag: 2);
-                    },
-                  );
-                },
+                child: _FlingBlock(
+                  tag: 1,
+                  color: Colors.pink,
+                  onPressed: (context) {
+                    Fling.push(context, boundaryTag: 2);
+                    Fling.push(context, boundaryTag: 2, tag: 2);
+                  },
+                ),
               ),
             ),
             Expanded(
               child: FlingBoundary(
                 tag: 2,
-                builder: (context) {
-                  return Column(
-                    children: [
-                      Expanded(
-                        child: _FlingBlock(
-                          tag: 1,
-                          color: Colors.deepPurple,
-                          width: 200,
-                          height: 100,
-                          onPressed: (context) {
-                            Fling.push(context, boundaryTag: 1);
-                            Fling.push(context, tag: 2);
-                          },
-                        ),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: _FlingBlock(
+                        tag: 1,
+                        color: Colors.deepPurple,
+                        width: 200,
+                        height: 100,
+                        onPressed: (context) {
+                          Fling.push(context, boundaryTag: 1);
+                          Fling.push(context, tag: 2);
+                        },
                       ),
-                      Expanded(
-                        child: _FlingBlock(
-                          tag: 2,
-                          color: Colors.teal,
-                          width: 100,
-                          height: 200,
-                          onPressed: (context) {
-                            Fling.push(context, boundaryTag: 1, tag: 1);
-                            Fling.push(context, tag: 1);
-                          },
-                        ),
+                    ),
+                    Expanded(
+                      child: _FlingBlock(
+                        tag: 2,
+                        color: Colors.teal,
+                        width: 100,
+                        height: 200,
+                        onPressed: (context) {
+                          Fling.push(context, boundaryTag: 1, tag: 1);
+                          Fling.push(context, tag: 1);
+                        },
                       ),
-                    ],
-                  );
-                },
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
