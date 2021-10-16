@@ -205,7 +205,7 @@ class Fling extends StatefulWidget {
   }
 
   /// push
-  static void push(BuildContext context, Object boundaryTag, Object tag) {
+  static void push(BuildContext context, [Object? boundaryTag, Object? tag]) {
     Fling.of(context).push(context, boundaryTag, tag);
   }
 
@@ -236,8 +236,8 @@ class FlingState extends State<Fling> {
   bool _shouldIncludeChild = true;
 
   /// push
-  void push(BuildContext context, Object boundaryTag, Object tag) {
-    FlingNavigator.push(context, boundaryTag, tag, this);
+  void push(BuildContext context, [Object? boundaryTag, Object? tag]) {
+    FlingNavigator.push(context, boundaryTag ?? FlingBoundary.of(context), tag ?? widget.tag, this);
   }
 
   // The `shouldIncludeChildInPlaceholder` flag dictates if the child widget of
