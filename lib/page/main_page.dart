@@ -169,7 +169,10 @@ class _FlingBlock extends StatelessWidget {
             size: Size.lerp(_flightShuttleSize, bounds.size, edgeValue),
             color: Color.lerp(_flightShuttleColor, child.color, edgeValue),
             radius: Radius.lerp(_flightShuttleRadius, child.radius, edgeValue),
-            child: edgeValue == 0 ? _flightShuttleChild : child.child,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 100),
+              child: edgeValue == 0 ? _flightShuttleChild : child.child,
+            ),
           ),
         );
       },
