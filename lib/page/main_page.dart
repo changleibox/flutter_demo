@@ -68,7 +68,23 @@ class _MainPageState extends State<MainPage> {
                       );
                       FlingBoundary.push(context, boundaryTag: 2, fromTag: 1, toTag: 2);
                       Fling.push(context, boundaryTag: 2, tag: 3);
-                      Fling.push(context, boundaryTag: 1, tag: 1);
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: _FlingBlock(
+                    tag: 2,
+                    color: Colors.indigo,
+                    onPressed: (context) {
+                      FlingNavigator.push(
+                        context,
+                        fromBoundaryTag: FlingBoundary.rootBoundaryTag,
+                        toBoundaryTag: 2,
+                        fromTag: 2,
+                        toTag: 1,
+                      );
+                      FlingBoundary.push(context, boundaryTag: 2, fromTag: 2, toTag: 2);
+                      Fling.push(context, boundaryTag: 2, tag: 3);
                     },
                   ),
                 ),
@@ -88,6 +104,8 @@ class _MainPageState extends State<MainPage> {
                       height: 100,
                       onPressed: (context) {
                         Fling.push(context, boundaryTag: 1, tag: 1);
+                        Fling.push(context, boundaryTag: FlingBoundary.rootBoundaryTag,tag: 1);
+                        Fling.push(context, boundaryTag: FlingBoundary.rootBoundaryTag,tag: 2);
                         Fling.push(context, tag: 2);
                       },
                     ),
@@ -99,8 +117,10 @@ class _MainPageState extends State<MainPage> {
                       width: 200,
                       height: 200,
                       onPressed: (context) {
-                        Fling.push(context, tag: 1);
                         Fling.push(context, boundaryTag: 1, tag: 1);
+                        Fling.push(context, boundaryTag: FlingBoundary.rootBoundaryTag,tag: 1);
+                        Fling.push(context, boundaryTag: FlingBoundary.rootBoundaryTag,tag: 2);
+                        Fling.push(context, tag: 1);
                         Fling.push(context, tag: 3);
                       },
                     ),
@@ -112,8 +132,10 @@ class _MainPageState extends State<MainPage> {
                       width: 100,
                       height: 200,
                       onPressed: (context) {
-                        Fling.push(context, tag: 2);
                         Fling.push(context, boundaryTag: 1, tag: 1);
+                        Fling.push(context, boundaryTag: FlingBoundary.rootBoundaryTag,tag: 1);
+                        Fling.push(context, boundaryTag: FlingBoundary.rootBoundaryTag,tag: 2);
+                        Fling.push(context, tag: 2);
                       },
                     ),
                   ),
@@ -147,6 +169,19 @@ class _FlingBlock extends StatelessWidget {
 
   final ValueChanged<BuildContext>? onPressed;
 
+  // The bounding box for `context`'s render object,  in `ancestorContext`'s
+  // render object's coordinate space.
+  static Rect _boundingBoxFor(BuildContext context) {
+    final flingState = (context as StatefulElement).state as FlingState;
+    final ancestorContext = flingState.boundary.navigator.context;
+    final box = context.findRenderObject()! as RenderBox;
+    assert(box.hasSize && box.size.isFinite);
+    return MatrixUtils.transformRect(
+      box.getTransformTo(ancestorContext.findRenderObject()),
+      Offset.zero & box.size,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -157,12 +192,16 @@ class _FlingBlock extends StatelessWidget {
         endCurve: _endInterval,
         flightSize: _flightShuttleSize,
         flightShuttleBuilder: (context, value, edgeValue, middleValue, fromFlingContext, toFlingContext) {
+          final fromLocation = _boundingBoxFor(fromFlingContext);
+          final toLocation = _boundingBoxFor(toFlingContext);
+          final offset = toLocation.center - fromLocation.center;
           final fromFling = fromFlingContext.widget as Fling;
           final toFling = toFlingContext.widget as Fling;
           final fling = middleValue == 1 ? toFling : fromFling;
           final child = (fling.child as _ContextBuilder).child as _ColorBlock;
+          final turnValue = offset.dx >= 0 ? middleValue : 1 - middleValue;
           return Transform.rotate(
-            angle: middleValue * math.pi * 2.0,
+            angle: turnValue * math.pi * 2.0,
             child: _ColorBlock.fromSize(
               size: Size.infinite,
               color: Color.lerp(_flightShuttleColor, child.color, edgeValue),
