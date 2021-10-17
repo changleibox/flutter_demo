@@ -10,7 +10,7 @@ const _flightShuttleColor = Colors.red;
 const _flightShuttleBorder = Border.fromBorderSide(
   BorderSide(
     color: Colors.black,
-    width: 2,
+    width: 1,
   ),
 );
 const _flightShuttleChild = Icon(
@@ -18,6 +18,7 @@ const _flightShuttleChild = Icon(
   size: 30,
   color: Colors.white,
 );
+const _noneBorder = Border.fromBorderSide(BorderSide.none);
 const _beginInterval = Interval(0.0, 0.2, curve: Curves.easeInOut);
 const _middleInterval = Interval(0.2, 0.7, curve: Curves.linear);
 const _endInterval = Interval(0.7, 1.0, curve: Curves.easeOut);
@@ -55,12 +56,12 @@ class _MainPageState extends State<MainPage> {
                     width: 100,
                     height: 200,
                     onPressed: (context) {
-                      // Fling.push(context, boundaryTag: 1, tag: 1);
-                      // Fling.push(context, boundaryTag: 2, tag: 1);
-                      // Fling.push(context, boundaryTag: 2, tag: 2);
-                      // Fling.push(context, boundaryTag: 2, tag: 3);
-                      // Fling.push(context, tag: 1);
-                      // Fling.push(context, tag: 2);
+                      Fling.push(context, boundaryTag: 1, tag: 1);
+                      Fling.push(context, boundaryTag: 2, tag: 1);
+                      Fling.push(context, boundaryTag: 2, tag: 2);
+                      Fling.push(context, boundaryTag: 2, tag: 3);
+                      Fling.push(context, tag: 1);
+                      Fling.push(context, tag: 2);
                       Fling.push(context, tag: 4);
                     },
                   );
@@ -262,32 +263,35 @@ class _FlingBlock extends StatelessWidget {
         final offset = toFlingLocation.center - fromFlingLocation.center;
         final fling = middleValue == 1 ? toFling : fromFling;
         final turnValue = offset.dx >= 0 ? middleValue : 1 - middleValue;
-        var child = fling.child;
+        Widget? child = fling.child;
+        Color? color;
+        Radius? radius;
+        Border? border;
         if (child is _ContextBuilder) {
           final colorBlock = child.child as _ColorBlock;
-          child = _ColorBlock(
-            color: Color.lerp(_flightShuttleColor, colorBlock.color, edgeValue),
-            radius: Radius.lerp(_flightShuttleRadius, colorBlock.radius, edgeValue),
-            border: Border.lerp(_flightShuttleBorder, colorBlock.border, edgeValue),
-            child: colorBlock.child,
-          );
+          color = Color.lerp(_flightShuttleColor, colorBlock.color, edgeValue);
+          radius = Radius.lerp(_flightShuttleRadius, colorBlock.radius, edgeValue);
+          border = Border.lerp(_flightShuttleBorder, colorBlock.border, edgeValue);
+          child = colorBlock.child;
         } else {
-          child = _ColorBlock(
-            color: Color.lerp(_flightShuttleColor, Colors.white.withOpacity(0), edgeValue),
-            radius: Radius.lerp(_flightShuttleRadius, Radius.zero, edgeValue),
-            border: Border.lerp(_flightShuttleBorder, const Border.fromBorderSide(BorderSide.none), edgeValue),
-            child: child,
-          );
+          color = Color.lerp(_flightShuttleColor, Colors.white.withOpacity(0), edgeValue);
+          radius = Radius.lerp(_flightShuttleRadius, Radius.zero, edgeValue);
+          border = Border.lerp(_flightShuttleBorder, _noneBorder, edgeValue);
         }
         final bounds = middleValue == 1 ? toFlingLocation : fromFlingLocation;
         return Stack(
           fit: StackFit.expand,
           children: [
-            FittedBox(
-              fit: BoxFit.fill,
-              child: SizedBox.fromSize(
-                size: edgeValue == 0 ? _flightShuttleSize : bounds.size,
-                child: child,
+            _ColorBlock(
+              color: color,
+              radius: radius,
+              border: border,
+              child: FittedBox(
+                fit: BoxFit.fill,
+                child: SizedBox.fromSize(
+                  size: edgeValue == 0 ? _flightShuttleSize : bounds.size,
+                  child: child,
+                ),
               ),
             ),
             Opacity(
@@ -336,7 +340,7 @@ class _ColorBlock extends StatelessWidget {
     this.border = const Border.fromBorderSide(
       BorderSide(
         color: Colors.black,
-        width: 2,
+        width: 1,
       ),
     ),
     this.child,
