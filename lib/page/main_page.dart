@@ -12,6 +12,9 @@ const _flightShuttleChild = Icon(
   size: 30,
   color: Colors.white,
 );
+const _beginInterval = Interval(0.0, 0.2, curve: Curves.easeInOut);
+const _middleInterval = Interval(0.2, 0.7, curve: Curves.linear);
+const _endInterval = Interval(0.7, 1.0, curve: Curves.easeOut);
 
 /// Created by changlei on 2020/7/6.
 ///
@@ -144,63 +147,30 @@ class _FlingBlock extends StatelessWidget {
 
   final ValueChanged<BuildContext>? onPressed;
 
-  static Widget _buildFlightShuttle(
-    BuildContext flightContext,
-    Animation<double> animation,
-    BuildContext fromFlingContext,
-    BuildContext toFlingContext,
-    Rect fromFlingLocation,
-    Rect toFlingLocation,
-  ) {
-    return FlightShuttleTransition(
-      fromFlingContext: fromFlingContext,
-      toFlingContext: toFlingContext,
-      fromFlingLocation: fromFlingLocation,
-      toFlingLocation: toFlingLocation,
-      factor: animation,
-      startInterval: const Interval(0.0, 0.2, curve: Curves.easeInOut),
-      middleInterval: const Interval(0.2, 0.7, curve: Curves.linear),
-      endInterval: const Interval(0.7, 1.0, curve: Curves.easeOut),
-      builder: (context, bounds, value, edgeValue, middleValue, fling) {
-        final child = (fling.child as _ContextBuilder).child as _ColorBlock;
-        return Transform.rotate(
-          angle: middleValue * math.pi * 2.0,
-          child: _ColorBlock.fromSize(
-            size: Size.lerp(_flightShuttleSize, bounds.size, edgeValue),
-            color: Color.lerp(_flightShuttleColor, child.color, edgeValue),
-            radius: Radius.lerp(_flightShuttleRadius, child.radius, edgeValue),
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 100),
-              child: edgeValue == 0 ? _flightShuttleChild : child.child,
-            ),
-          ),
-        );
-      },
-      interpolator: (start, end, t) {
-        // 二阶贝塞尔曲线
-        final Offset control;
-        if (end.dx == 0 || end.dy == 0) {
-          control = Offset.zero;
-        } else if (end.dy < 0) {
-          control = Offset(0, end.dy);
-        } else {
-          control = Offset(end.dx, 0);
-        }
-        final vertex = start + control;
-        return start * math.pow(1 - t, 2).toDouble() + vertex * 2 * t * (1 - t) + end * math.pow(t, 2).toDouble();
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Fling(
+      child: BesselFling(
         tag: tag,
-        placeholderBuilder: (context, flingSize, child) {
-          return child;
+        beginCurve: _beginInterval,
+        middleCurve: _middleInterval,
+        endCurve: _endInterval,
+        flightSize: _flightShuttleSize,
+        flightShuttleBuilder: (context, value, edgeValue, middleValue, fling) {
+          final child = (fling.child as _ContextBuilder).child as _ColorBlock;
+          return Transform.rotate(
+            angle: middleValue * math.pi * 2.0,
+            child: _ColorBlock.fromSize(
+              size: Size.infinite,
+              color: Color.lerp(_flightShuttleColor, child.color, edgeValue),
+              radius: Radius.lerp(_flightShuttleRadius, child.radius, edgeValue),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 100),
+                child: edgeValue == 0 ? _flightShuttleChild : child.child,
+              ),
+            ),
+          );
         },
-        flightShuttleBuilder: _buildFlightShuttle,
         child: _ContextBuilder(
           onPressed: onPressed,
           child: _ColorBlock(
