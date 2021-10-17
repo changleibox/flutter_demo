@@ -31,9 +31,35 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
+      navigationBar: CupertinoNavigationBar(
         backgroundColor: Colors.white,
-        middle: Text('测试'),
+        middle: const Text('Fling示例'),
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () {
+            showCupertinoDialog<void>(
+              context: context,
+              barrierDismissible: true,
+              builder: (context) {
+                return _FlingBlock(
+                  tag: 3,
+                  color: Colors.orange,
+                  width: 100,
+                  height: 200,
+                  onPressed: (context) {
+                    Fling.push(context, boundaryTag: 1, tag: 1);
+                    Fling.push(context, tag: 1);
+                    Fling.push(context, tag: 2);
+                    Fling.push(context, boundaryTag: 2, tag: 1);
+                    Fling.push(context, boundaryTag: 2, tag: 2);
+                    Fling.push(context, boundaryTag: 2, tag: 3);
+                  },
+                );
+              },
+            );
+          },
+          child: const Text('跨路由'),
+        ),
       ),
       child: Row(
         children: [
@@ -104,8 +130,8 @@ class _MainPageState extends State<MainPage> {
                       height: 100,
                       onPressed: (context) {
                         Fling.push(context, boundaryTag: 1, tag: 1);
-                        Fling.push(context, boundaryTag: FlingBoundary.rootBoundaryTag,tag: 1);
-                        Fling.push(context, boundaryTag: FlingBoundary.rootBoundaryTag,tag: 2);
+                        Fling.push(context, boundaryTag: FlingBoundary.rootBoundaryTag, tag: 1);
+                        Fling.push(context, boundaryTag: FlingBoundary.rootBoundaryTag, tag: 2);
                         Fling.push(context, tag: 2);
                       },
                     ),
@@ -118,8 +144,8 @@ class _MainPageState extends State<MainPage> {
                       height: 200,
                       onPressed: (context) {
                         Fling.push(context, boundaryTag: 1, tag: 1);
-                        Fling.push(context, boundaryTag: FlingBoundary.rootBoundaryTag,tag: 1);
-                        Fling.push(context, boundaryTag: FlingBoundary.rootBoundaryTag,tag: 2);
+                        Fling.push(context, boundaryTag: FlingBoundary.rootBoundaryTag, tag: 1);
+                        Fling.push(context, boundaryTag: FlingBoundary.rootBoundaryTag, tag: 2);
                         Fling.push(context, tag: 1);
                         Fling.push(context, tag: 3);
                       },
@@ -133,8 +159,8 @@ class _MainPageState extends State<MainPage> {
                       height: 200,
                       onPressed: (context) {
                         Fling.push(context, boundaryTag: 1, tag: 1);
-                        Fling.push(context, boundaryTag: FlingBoundary.rootBoundaryTag,tag: 1);
-                        Fling.push(context, boundaryTag: FlingBoundary.rootBoundaryTag,tag: 2);
+                        Fling.push(context, boundaryTag: FlingBoundary.rootBoundaryTag, tag: 1);
+                        Fling.push(context, boundaryTag: FlingBoundary.rootBoundaryTag, tag: 2);
                         Fling.push(context, tag: 2);
                       },
                     ),
@@ -169,19 +195,6 @@ class _FlingBlock extends StatelessWidget {
 
   final ValueChanged<BuildContext>? onPressed;
 
-  // The bounding box for `context`'s render object,  in `ancestorContext`'s
-  // render object's coordinate space.
-  static Rect _boundingBoxFor(BuildContext context) {
-    final flingState = (context as StatefulElement).state as FlingState;
-    final ancestorContext = flingState.boundary.navigator.context;
-    final box = context.findRenderObject()! as RenderBox;
-    assert(box.hasSize && box.size.isFinite);
-    return MatrixUtils.transformRect(
-      box.getTransformTo(ancestorContext.findRenderObject()),
-      Offset.zero & box.size,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -191,12 +204,17 @@ class _FlingBlock extends StatelessWidget {
         middleCurve: _middleInterval,
         endCurve: _endInterval,
         flightSize: _flightShuttleSize,
-        flightShuttleBuilder: (context, value, edgeValue, middleValue, fromFlingContext, toFlingContext) {
-          final fromLocation = _boundingBoxFor(fromFlingContext);
-          final toLocation = _boundingBoxFor(toFlingContext);
-          final offset = toLocation.center - fromLocation.center;
-          final fromFling = fromFlingContext.widget as Fling;
-          final toFling = toFlingContext.widget as Fling;
+        flightShuttleBuilder: (
+          context,
+          value,
+          edgeValue,
+          middleValue,
+          fromFling,
+          toFling,
+          fromFlingLocation,
+          toFlingLocation,
+        ) {
+          final offset = toFlingLocation.center - fromFlingLocation.center;
           final fling = middleValue == 1 ? toFling : fromFling;
           final child = (fling.child as _ContextBuilder).child as _ColorBlock;
           final turnValue = offset.dx >= 0 ? middleValue : 1 - middleValue;
