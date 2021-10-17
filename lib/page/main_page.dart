@@ -7,6 +7,12 @@ import 'package:flutter/material.dart';
 const _flightShuttleSize = Size.square(40);
 const _flightShuttleRadius = Radius.circular(20);
 const _flightShuttleColor = Colors.red;
+const _flightShuttleBorder = Border.fromBorderSide(
+  BorderSide(
+    color: Colors.black,
+    width: 2,
+  ),
+);
 const _flightShuttleChild = Icon(
   Icons.flight,
   size: 30,
@@ -34,31 +40,38 @@ class _MainPageState extends State<MainPage> {
       navigationBar: CupertinoNavigationBar(
         backgroundColor: Colors.white,
         middle: const Text('Fling示例'),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: () {
-            showCupertinoDialog<void>(
-              context: context,
-              barrierDismissible: true,
-              builder: (context) {
-                return _FlingBlock(
-                  tag: 3,
-                  color: Colors.orange,
-                  width: 100,
-                  height: 200,
-                  onPressed: (context) {
-                    Fling.push(context, boundaryTag: 1, tag: 1);
-                    Fling.push(context, tag: 1);
-                    Fling.push(context, tag: 2);
-                    Fling.push(context, boundaryTag: 2, tag: 1);
-                    Fling.push(context, boundaryTag: 2, tag: 2);
-                    Fling.push(context, boundaryTag: 2, tag: 3);
-                  },
-                );
-              },
-            );
-          },
-          child: const Text('跨路由'),
+        trailing: _FlingBlock(
+          tag: 4,
+          child: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () {
+              showCupertinoDialog<void>(
+                context: context,
+                barrierDismissible: true,
+                builder: (context) {
+                  return _FlingColorBlock(
+                    tag: 3,
+                    color: Colors.orange,
+                    width: 100,
+                    height: 200,
+                    onPressed: (context) {
+                      // Fling.push(context, boundaryTag: 1, tag: 1);
+                      // Fling.push(context, boundaryTag: 2, tag: 1);
+                      // Fling.push(context, boundaryTag: 2, tag: 2);
+                      // Fling.push(context, boundaryTag: 2, tag: 3);
+                      // Fling.push(context, tag: 1);
+                      // Fling.push(context, tag: 2);
+                      Fling.push(context, tag: 4);
+                    },
+                  );
+                },
+              );
+            },
+            child: const Text(
+              '跨路由',
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ),
       ),
       child: Row(
@@ -69,7 +82,7 @@ class _MainPageState extends State<MainPage> {
                 Expanded(
                   child: FlingBoundary(
                     tag: 1,
-                    child: _FlingBlock(
+                    child: _FlingColorBlock(
                       tag: 1,
                       color: Colors.pink,
                       onPressed: (context) {
@@ -81,7 +94,7 @@ class _MainPageState extends State<MainPage> {
                   ),
                 ),
                 Expanded(
-                  child: _FlingBlock(
+                  child: _FlingColorBlock(
                     tag: 1,
                     color: Colors.blue,
                     onPressed: (context) {
@@ -98,7 +111,7 @@ class _MainPageState extends State<MainPage> {
                   ),
                 ),
                 Expanded(
-                  child: _FlingBlock(
+                  child: _FlingColorBlock(
                     tag: 2,
                     color: Colors.indigo,
                     onPressed: (context) {
@@ -123,7 +136,7 @@ class _MainPageState extends State<MainPage> {
               child: Column(
                 children: [
                   Expanded(
-                    child: _FlingBlock(
+                    child: _FlingColorBlock(
                       tag: 1,
                       color: Colors.deepPurple,
                       width: 200,
@@ -137,7 +150,7 @@ class _MainPageState extends State<MainPage> {
                     ),
                   ),
                   Expanded(
-                    child: _FlingBlock(
+                    child: _FlingColorBlock(
                       tag: 2,
                       color: Colors.teal,
                       width: 200,
@@ -152,7 +165,7 @@ class _MainPageState extends State<MainPage> {
                     ),
                   ),
                   Expanded(
-                    child: _FlingBlock(
+                    child: _FlingColorBlock(
                       tag: 3,
                       color: Colors.orange,
                       width: 100,
@@ -175,13 +188,14 @@ class _MainPageState extends State<MainPage> {
   }
 }
 
-class _FlingBlock extends StatelessWidget {
-  const _FlingBlock({
+class _FlingColorBlock extends StatelessWidget {
+  const _FlingColorBlock({
     Key? key,
     required this.tag,
     required this.color,
     this.width,
     this.height,
+    this.child,
     required this.onPressed,
   }) : super(key: key);
 
@@ -193,53 +207,100 @@ class _FlingBlock extends StatelessWidget {
 
   final double? height;
 
+  final Widget? child;
+
   final ValueChanged<BuildContext>? onPressed;
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: BesselFling(
+      child: _FlingBlock(
         tag: tag,
-        beginCurve: _beginInterval,
-        middleCurve: _middleInterval,
-        endCurve: _endInterval,
-        flightSize: _flightShuttleSize,
-        flightShuttleBuilder: (
-          context,
-          value,
-          edgeValue,
-          middleValue,
-          fromFling,
-          toFling,
-          fromFlingLocation,
-          toFlingLocation,
-        ) {
-          final offset = toFlingLocation.center - fromFlingLocation.center;
-          final fling = middleValue == 1 ? toFling : fromFling;
-          final child = (fling.child as _ContextBuilder).child as _ColorBlock;
-          final turnValue = offset.dx >= 0 ? middleValue : 1 - middleValue;
-          return Transform.rotate(
-            angle: turnValue * math.pi * 2.0,
-            child: _ColorBlock.fromSize(
-              size: Size.infinite,
-              color: Color.lerp(_flightShuttleColor, child.color, edgeValue),
-              radius: Radius.lerp(_flightShuttleRadius, child.radius, edgeValue),
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 100),
-                child: edgeValue == 0 ? _flightShuttleChild : child.child,
-              ),
-            ),
-          );
-        },
         child: _ContextBuilder(
           onPressed: onPressed,
           child: _ColorBlock(
             width: width ?? 100,
             height: height ?? 100,
             color: color,
+            child: child,
           ),
         ),
       ),
+    );
+  }
+}
+
+class _FlingBlock extends StatelessWidget {
+  const _FlingBlock({
+    Key? key,
+    required this.tag,
+    required this.child,
+  }) : super(key: key);
+
+  final Object tag;
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return BesselFling(
+      tag: tag,
+      beginCurve: _beginInterval,
+      middleCurve: _middleInterval,
+      endCurve: _endInterval,
+      flightSize: _flightShuttleSize,
+      flightShuttleBuilder: (
+        context,
+        value,
+        edgeValue,
+        middleValue,
+        fromFling,
+        toFling,
+        fromFlingLocation,
+        toFlingLocation,
+      ) {
+        final offset = toFlingLocation.center - fromFlingLocation.center;
+        final fling = middleValue == 1 ? toFling : fromFling;
+        final turnValue = offset.dx >= 0 ? middleValue : 1 - middleValue;
+        var child = fling.child;
+        if (child is _ContextBuilder) {
+          final colorBlock = child.child as _ColorBlock;
+          child = _ColorBlock(
+            color: Color.lerp(_flightShuttleColor, colorBlock.color, edgeValue),
+            radius: Radius.lerp(_flightShuttleRadius, colorBlock.radius, edgeValue),
+            border: Border.lerp(_flightShuttleBorder, colorBlock.border, edgeValue),
+            child: colorBlock.child,
+          );
+        } else {
+          child = _ColorBlock(
+            color: Color.lerp(_flightShuttleColor, Colors.white.withOpacity(0), edgeValue),
+            radius: Radius.lerp(_flightShuttleRadius, Radius.zero, edgeValue),
+            border: Border.lerp(_flightShuttleBorder, const Border.fromBorderSide(BorderSide.none), edgeValue),
+            child: child,
+          );
+        }
+        final bounds = middleValue == 1 ? toFlingLocation : fromFlingLocation;
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            FittedBox(
+              fit: BoxFit.fill,
+              child: SizedBox.fromSize(
+                size: edgeValue == 0 ? _flightShuttleSize : bounds.size,
+                child: child,
+              ),
+            ),
+            Opacity(
+              opacity: 1 - edgeValue,
+              child: Transform.rotate(
+                angle: turnValue * math.pi * 2.0,
+                child: _flightShuttleChild,
+              ),
+            ),
+          ],
+        );
+      },
+      child: child,
     );
   }
 }
@@ -272,23 +333,20 @@ class _ColorBlock extends StatelessWidget {
     this.height,
     this.color,
     this.radius = const Radius.circular(10),
+    this.border = const Border.fromBorderSide(
+      BorderSide(
+        color: Colors.black,
+        width: 2,
+      ),
+    ),
     this.child,
   }) : super(key: key);
-
-  _ColorBlock.fromSize({
-    Key? key,
-    Size? size,
-    this.color,
-    this.radius = const Radius.circular(10),
-    this.child,
-  })  : width = size?.width,
-        height = size?.height,
-        super(key: key);
 
   final double? width;
   final double? height;
   final Color? color;
   final Radius? radius;
+  final Border? border;
   final Widget? child;
 
   @override
@@ -303,10 +361,7 @@ class _ColorBlock extends StatelessWidget {
       ),
       foregroundDecoration: BoxDecoration(
         borderRadius: borderRadius,
-        border: Border.all(
-          color: Colors.black,
-          width: 1,
-        ),
+        border: border,
       ),
       clipBehavior: Clip.antiAlias,
       child: child,
