@@ -56,7 +56,6 @@ class _MainPageState extends State<MainPage> {
                     width: 100,
                     height: 200,
                     onPressed: (context) {
-                      Navigator.pop(context);
                       Fling.push(context, boundaryTag: 1, tag: 1);
                       Fling.push(context, boundaryTag: 2, tag: 1);
                       Fling.push(context, boundaryTag: 2, tag: 2);
@@ -64,6 +63,7 @@ class _MainPageState extends State<MainPage> {
                       Fling.push(context, tag: 1);
                       Fling.push(context, tag: 2);
                       Fling.push(context, tag: 4);
+                      Navigator.pop(context);
                     },
                   );
                 },
