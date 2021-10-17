@@ -62,7 +62,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: d4cabf7294890d217666eb03a6c06529a26ee5db
+      resolved-ref: "3349b24adf6981de578015573d9e7fcb09e19e11"
       url: "https://github.com/changleibox/fling.git"
     source: git
     version: "0.0.1"

@@ -1,3 +1,4 @@
+import 'package:fling/fling.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_demo/page/main_page.dart';
 
@@ -10,9 +11,17 @@ class DemoApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const CupertinoApp(
+    return CupertinoApp(
       title: 'Flutter Demo',
-      home: MainPage(),
+      builder: (context, child) {
+        return FlingNavigator(
+          duration: const Duration(
+            seconds: 3,
+          ),
+          child: child!,
+        );
+      },
+      home: const MainPage(),
     );
   }
 }

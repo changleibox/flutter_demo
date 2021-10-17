@@ -31,74 +31,93 @@ class _MainPageState extends State<MainPage> {
         backgroundColor: Colors.white,
         middle: Text('测试'),
       ),
-      child: FlingWidgetsApp(
-        duration: const Duration(
-          seconds: 3,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: FlingBoundary(
-                tag: 1,
-                child: _FlingBlock(
-                  tag: 1,
-                  color: Colors.pink,
-                  onPressed: (context) {
-                    Fling.push(context, boundaryTag: 2, tag: 1);
-                    Fling.push(context, boundaryTag: 2, tag: 2);
-                    Fling.push(context, boundaryTag: 2, tag: 3);
-                  },
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              children: [
+                Expanded(
+                  child: FlingBoundary(
+                    tag: 1,
+                    child: _FlingBlock(
+                      tag: 1,
+                      color: Colors.pink,
+                      onPressed: (context) {
+                        FlingNavigator.push(context, fromBoundaryTag: 1, toBoundaryTag: 2, fromTag: 1, toTag: 1);
+                        FlingBoundary.push(context, boundaryTag: 2, fromTag: 1, toTag: 2);
+                        Fling.push(context, boundaryTag: 2, tag: 3);
+                      },
+                    ),
+                  ),
                 ),
+                Expanded(
+                  child: _FlingBlock(
+                    tag: 1,
+                    color: Colors.blue,
+                    onPressed: (context) {
+                      FlingNavigator.push(
+                        context,
+                        fromBoundaryTag: FlingBoundary.rootBoundaryTag,
+                        toBoundaryTag: 2,
+                        fromTag: 1,
+                        toTag: 1,
+                      );
+                      FlingBoundary.push(context, boundaryTag: 2, fromTag: 1, toTag: 2);
+                      Fling.push(context, boundaryTag: 2, tag: 3);
+                      Fling.push(context, boundaryTag: 1, tag: 1);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: FlingBoundary(
+              tag: 2,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: _FlingBlock(
+                      tag: 1,
+                      color: Colors.deepPurple,
+                      width: 200,
+                      height: 100,
+                      onPressed: (context) {
+                        Fling.push(context, boundaryTag: 1, tag: 1);
+                        Fling.push(context, tag: 2);
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: _FlingBlock(
+                      tag: 2,
+                      color: Colors.teal,
+                      width: 200,
+                      height: 200,
+                      onPressed: (context) {
+                        Fling.push(context, tag: 1);
+                        Fling.push(context, boundaryTag: 1, tag: 1);
+                        Fling.push(context, tag: 3);
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: _FlingBlock(
+                      tag: 3,
+                      color: Colors.orange,
+                      width: 100,
+                      height: 200,
+                      onPressed: (context) {
+                        Fling.push(context, tag: 2);
+                        Fling.push(context, boundaryTag: 1, tag: 1);
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
-            Expanded(
-              child: FlingBoundary(
-                tag: 2,
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: _FlingBlock(
-                        tag: 1,
-                        color: Colors.deepPurple,
-                        width: 200,
-                        height: 100,
-                        onPressed: (context) {
-                          Fling.push(context, boundaryTag: 1, tag: 1);
-                          Fling.push(context, tag: 2);
-                        },
-                      ),
-                    ),
-                    Expanded(
-                      child: _FlingBlock(
-                        tag: 2,
-                        color: Colors.teal,
-                        width: 200,
-                        height: 200,
-                        onPressed: (context) {
-                          Fling.push(context, tag: 1);
-                          Fling.push(context, boundaryTag: 1, tag: 1);
-                          Fling.push(context, tag: 3);
-                        },
-                      ),
-                    ),
-                    Expanded(
-                      child: _FlingBlock(
-                        tag: 3,
-                        color: Colors.orange,
-                        width: 100,
-                        height: 200,
-                        onPressed: (context) {
-                          Fling.push(context, tag: 2);
-                          Fling.push(context, boundaryTag: 1, tag: 1);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
