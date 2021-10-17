@@ -6,10 +6,11 @@ import 'package:flutter/material.dart';
 
 const _flightShuttleSize = Size.square(40);
 const _flightShuttleRadius = Radius.circular(20);
-const _flightShuttleColor = Colors.indigo;
-const _flightShuttleChild = FlutterLogo(
-  size: 40,
-  textColor: Colors.white,
+const _flightShuttleColor = Colors.red;
+const _flightShuttleChild = Icon(
+  Icons.flight,
+  size: 30,
+  color: Colors.white,
 );
 
 /// Created by changlei on 2020/7/6.
