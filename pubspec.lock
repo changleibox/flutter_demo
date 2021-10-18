@@ -63,7 +63,7 @@ packages:
       path: "."
       ref: HEAD
       resolved-ref: "3e4102a06da1118d2f6a7cb594760409d4694c01"
-      url: "https://github.com/changleibox/fling.git"
+      url: "https://github.com.cnpmjs.org/changleibox/fling.git"
     source: git
     version: "0.0.1"
   flutter:
