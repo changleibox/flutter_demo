@@ -30,6 +30,8 @@ dependencies:
   cupertino_icons: ^1.0.3
   fling:
     git: https://github.com.cnpmjs.org/changleibox/fling.git
+  cavity_mask:
+    git: https://github.com.cnpmjs.org/changleibox/cavity_mask.git
 
 dev_dependencies:
   flutter_test:
