@@ -69,18 +69,21 @@ class _MaskPageState extends State<MaskPage> {
             position: MaskPosition.foreground,
             barrier: true,
             child: SingleChildScrollView(
-              padding: MediaQuery.of(context).padding + const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: List.generate(100 - 1, (index) {
-                  if (index.isEven) {
-                    return _buildChild(index ~/ 2);
-                  } else {
-                    return const SizedBox(
-                      height: 20,
-                    );
-                  }
-                }),
+              padding: MediaQuery.of(context).padding,
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: List.generate(100 - 1, (index) {
+                    if (index.isEven) {
+                      return _buildChild(index ~/ 2);
+                    } else {
+                      return const SizedBox(
+                        height: 20,
+                      );
+                    }
+                  }),
+                ),
               ),
             ),
           );
