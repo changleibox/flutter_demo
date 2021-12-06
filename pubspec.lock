@@ -20,7 +20,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "8bad7b09b9bcbd707a7213795eae4d32ba279a03"
+      resolved-ref: "313a2912bc864c3f9f45cfb2d507511b6c12909d"
       url: "https://github.com.cnpmjs.org/changleibox/cavity_mask.git"
     source: git
     version: "0.0.1"
