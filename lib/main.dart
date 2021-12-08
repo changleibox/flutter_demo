@@ -1,5 +1,6 @@
 import 'package:fling/fling.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_demo/page/corner_triangle.dart';
 import 'package:flutter_demo/page/fling_page.dart';
 import 'package:flutter_demo/page/main_page.dart';
 import 'package:flutter_demo/page/mask_page.dart';
@@ -13,6 +14,7 @@ final routes = <String, WidgetBuilder>{
   '/': (context) => const MainPage(),
   'fling': (context) => const FlingPage(),
   'mask': (context) => const MaskPage(),
+  'cornerTriangle': (context) => const CornerTrianglePage(),
 };
 
 /// demo
