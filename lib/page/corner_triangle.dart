@@ -87,32 +87,38 @@ class _CornerTrianglePainter extends CustomPainter {
 
   void _paintCircle(Canvas canvas, double width, double height, double radius) {
     final radians = math.atan(width / 2 / height);
-
-    final ao = radius / math.tan(radians) / math.cos(radians);
-
-    final pathCircle = Path();
-    pathCircle.moveTo(0, 0);
-    pathCircle.addOval(Rect.fromLTWH(0, 0, radius * 2, radius * 2));
-
-    final path3 = pathCircle.shift(Offset(width / 2 - radius, ao - radius));
-    final path4 = pathCircle.shift(
-      Offset(-radius / math.tan((math.pi / 2 - radians) / 2), height - radius * 2),
+    final path = Path();
+    final topCircle = _circlePath(
+      radians,
+      radius,
+      offset: Offset(width / 2, 0),
     );
+    path.addPath(topCircle, Offset.zero);
+    final leftCircle = _circlePath(
+      (math.pi / 2 + radians) / 2,
+      radius,
+      rotation: math.pi - (math.pi / 2 - radians) / 2,
+      offset: Offset(0, height),
+    );
+    path.addPath(leftCircle, Offset.zero);
 
-    final pathLeft = Path();
-    pathLeft.addPath(path3, Offset.zero);
-    pathLeft.addPath(path4, Offset.zero);
-
-    final pathRight = pathLeft.transform(Matrix4.rotationY(math.pi).storage).shift(Offset(width, 0));
+    var halfPath = path.transform(Matrix4.rotationY(math.pi).storage);
+    halfPath = halfPath.shift(Offset(width, 0));
+    path.addPath(halfPath, Offset.zero);
 
     canvas.drawPath(
-      Path.combine(
-        PathOperation.union,
-        pathLeft,
-        pathRight,
-      ),
+      path,
       _paint..color = CupertinoColors.activeGreen,
     );
+  }
+
+  Path _circlePath(double radians, double radius, {double rotation = 0, Offset offset = Offset.zero}) {
+    final ao = radius / math.tan(radians) / math.cos(radians);
+    final ai = ao - radius;
+    final path = Path();
+    path.addOval(Rect.fromLTWH(-radius, ai, radius * 2, radius * 2));
+
+    return path.transform(Matrix4.rotationZ(rotation).storage).shift(offset);
   }
 
   void _paintRadiusTriangle(Canvas canvas, double width, double height, double radius) {
@@ -164,7 +170,7 @@ class _CornerTrianglePainter extends CustomPainter {
 
     final leftCorner = _radiansPath(
       (math.pi / 2 + radians) / 2,
-      100,
+      radius,
       rotation: math.pi - (math.pi / 2 - radians) / 2,
       offset: rect.bottomLeft,
     );
