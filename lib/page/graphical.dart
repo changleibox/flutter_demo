@@ -10,7 +10,7 @@ Path circlePath(double width, double height, double radius) {
     width,
     height,
     radius,
-    paint: (path, ag, eg, ai) {
+    paint: (path, ag, eg, ai, radius) {
       path.addOval(Rect.fromLTWH(-radius, ai, radius * 2, radius * 2));
     },
   );
@@ -22,7 +22,7 @@ Path trianglePath(double width, double height, [double radius = 0]) {
     width,
     height,
     radius,
-    paint: (path, ag, eg, ai) {
+    paint: (path, ag, eg, ai, radius) {
       path.moveTo(-eg, ag);
       path.arcToPoint(Offset(eg, ag), radius: Radius.circular(radius));
     },
@@ -71,14 +71,14 @@ Path elementPath(
   double radius, {
   double rotation = 0,
   Offset offset = Offset.zero,
-  void Function(Path path, double ag, double eg, double ai)? paint,
+  void Function(Path path, double ag, double eg, double ai, double radius)? paint,
 }) {
   final ae = radius / math.tan(radians);
   final ag = ae * math.cos(radians);
   final eg = ae * math.sin(radians);
   final ai = ae / math.cos(radians) - radius;
   final path = Path();
-  paint?.call(path, ag, eg, ai);
+  paint?.call(path, ag, eg, ai, radius);
   return path.transform(Matrix4.rotationZ(rotation).storage).shift(offset);
 }
 
@@ -87,7 +87,7 @@ Path cornerPath(
   double width,
   double height,
   double radius, {
-  void Function(Path path, double ag, double eg, double ai)? paint,
+  void Function(Path path, double ag, double eg, double ai, double radius)? paint,
   void Function(Path path, Rect top, Rect left, Rect rect)? visitor,
 }) {
   final path = Path();
@@ -105,7 +105,7 @@ Path cornerPath(
 
   final leftCorner = elementPath(
     (math.pi / 2 + radians) / 2,
-    radius,
+    radius * 4,
     rotation: math.pi - (math.pi / 2 - radians) / 2,
     offset: rect.bottomLeft,
     paint: paint,
