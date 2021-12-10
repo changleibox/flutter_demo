@@ -1,6 +1,5 @@
-import 'dart:math' as math;
-
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_demo/page/graphical.dart' as graphical;
 
 const _extendedLine = 140.0;
 
@@ -59,9 +58,9 @@ class _CornerTrianglePainter extends CustomPainter {
     final width = size.width;
     final height = size.height;
 
-    _paintTriangle(canvas, width, height);
+    _paintBaseTriangle(canvas, width, height);
     _paintCircle(canvas, width, height, radius);
-    _paintRadiusTriangle(canvas, width, height, radius);
+    _paintTriangle(canvas, width, height, radius);
   }
 
   @override
@@ -69,7 +68,7 @@ class _CornerTrianglePainter extends CustomPainter {
     return true;
   }
 
-  void _paintTriangle(Canvas canvas, double width, double height) {
+  void _paintBaseTriangle(Canvas canvas, double width, double height) {
     final path = Path();
     path.moveTo(0, 0);
     path.relativeLineTo(-width / 2, height);
@@ -87,107 +86,21 @@ class _CornerTrianglePainter extends CustomPainter {
 
   void _paintCircle(Canvas canvas, double width, double height, double radius) {
     canvas.drawPath(
-      _cornerPath(
-        width,
-        height,
-        radius,
-        paint: (path, ag, eg, ai) {
-          path.addOval(Rect.fromLTWH(-radius, ai, radius * 2, radius * 2));
-        },
-      ),
+      graphical.circlePath(width, height, radius),
       _paint..color = CupertinoColors.activeGreen,
     );
   }
 
-  void _paintRadiusTriangle(Canvas canvas, double width, double height, double radius) {
+  void _paintTriangle(Canvas canvas, double width, double height, double radius) {
     canvas.drawPath(
-      _trianglePath(width, height, radius),
+      graphical.trianglePath(width, height, radius),
       _paint..color = CupertinoColors.systemRed,
     );
 
-    final outerHeight = _outerHeight(width, height, radius);
+    final outerHeight = graphical.heightCompensate(width, height, radius);
     canvas.drawPath(
-      _trianglePath(width, outerHeight, radius).shift(Offset(0, height - outerHeight)),
+      graphical.trianglePath(width, outerHeight, radius).shift(Offset(0, height - outerHeight)),
       _paint..color = CupertinoColors.systemBlue,
     );
   }
-}
-
-Path _trianglePath(double width, double height, double radius) {
-  return _cornerPath(
-    width,
-    height,
-    radius,
-    paint: (path, ag, eg, ai) {
-      path.moveTo(-eg, ag);
-      path.arcToPoint(Offset(eg, ag), radius: Radius.circular(radius));
-    },
-    visitor: (path, top, left, rect) {
-      path.addPolygon([top.bottomLeft, left.topRight], false);
-      path.addPolygon([left.bottomLeft, rect.bottomCenter], false);
-    },
-  );
-}
-
-double _outerHeight(double width, double height, double radius) {
-  final of = height - radius;
-  final bf = width / 2;
-  final bo = math.sqrt(math.pow(of, 2) + math.pow(bf, 2));
-  final bof = math.atan(bf / of);
-  final boe = math.acos(radius / bo);
-  final newRadians = bof + boe - math.pi / 2;
-  return bf / math.tan(newRadians);
-}
-
-Path _elementPath(
-  double radians,
-  double radius, {
-  double rotation = 0,
-  Offset offset = Offset.zero,
-  void Function(Path path, double ag, double eg, double ai)? paint,
-}) {
-  final ae = radius / math.tan(radians);
-  final ag = ae * math.cos(radians);
-  final eg = ae * math.sin(radians);
-  final ai = ae / math.cos(radians) - radius;
-  final path = Path();
-  paint?.call(path, ag, eg, ai);
-  return path.transform(Matrix4.rotationZ(rotation).storage).shift(offset);
-}
-
-Path _cornerPath(
-  double width,
-  double height,
-  double radius, {
-  void Function(Path path, double ag, double eg, double ai)? paint,
-  void Function(Path path, Rect top, Rect left, Rect rect)? visitor,
-}) {
-  final path = Path();
-  final rect = Offset.zero & Size(width, height);
-  final radians = math.atan(width / 2 / height);
-
-  final topCorner = _elementPath(
-    radians,
-    radius,
-    rotation: 0,
-    offset: rect.topCenter,
-    paint: paint,
-  );
-  path.addPath(topCorner, Offset.zero);
-
-  final leftCorner = _elementPath(
-    (math.pi / 2 + radians) / 2,
-    radius,
-    rotation: math.pi - (math.pi / 2 - radians) / 2,
-    offset: rect.bottomLeft,
-    paint: paint,
-  );
-  path.addPath(leftCorner, Offset.zero);
-
-  visitor?.call(path, topCorner.getBounds(), leftCorner.getBounds(), rect);
-
-  var halfPath = path.transform(Matrix4.rotationY(math.pi).storage);
-  halfPath = halfPath.shift(Offset(width, 0));
-  path.addPath(halfPath, Offset.zero);
-  return path;
 }
