@@ -48,13 +48,17 @@ class _MaskPageState extends State<MaskPage> {
         child: child,
       );
     }
-    return CupertinoButton.filled(
-      onPressed: () {
-        print('pressed');
-      },
-      minSize: 40,
-      padding: EdgeInsets.zero,
-      child: child,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        minWidth: 40,
+      ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: CupertinoColors.activeBlue,
+        ),
+        child: child,
+      ),
     );
   }
 

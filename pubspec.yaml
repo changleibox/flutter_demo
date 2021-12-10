@@ -31,7 +31,7 @@ dependencies:
   fling:
     git: https://github.com.cnpmjs.org/changleibox/fling.git
   cavity_mask:
-    path: /Users/changlei/Downloads/FlutterWorkspace/cavity_mask
+    git: https://github.com.cnpmjs.org/changleibox/cavity_mask.git
 
 dev_dependencies:
   flutter_test:
