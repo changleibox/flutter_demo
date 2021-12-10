@@ -144,7 +144,7 @@ class _CornerTrianglePainter extends CustomPainter {
     final eg = ae * math.sin(radians);
     final path = Path();
     path.moveTo(-eg, ag);
-    path.arcToPoint(Offset(eg, ag), radius: Radius.circular(radius), clockwise: true);
+    path.arcToPoint(Offset(eg, ag), radius: Radius.circular(radius));
     return path.transform(Matrix4.rotationZ(rotation).storage).shift(offset);
   }
 
@@ -159,7 +159,7 @@ class _CornerTrianglePainter extends CustomPainter {
 
     var rightCorner = _radiansPath(radians + math.pi / 2, radius, rotation: radians);
     bounds = rightCorner.getBounds();
-    rightCorner = rightCorner.shift(Offset(width + bounds.width / 2, height - bounds.height));
+    rightCorner = rightCorner.shift(Offset(width + bounds.right, height - bounds.height));
 
     bounds = rightCorner.getBounds();
     path.lineTo(bounds.left, bounds.top);
