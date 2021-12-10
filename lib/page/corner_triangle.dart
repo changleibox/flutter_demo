@@ -145,34 +145,37 @@ class _CornerTrianglePainter extends CustomPainter {
     final path = Path();
     path.moveTo(-eg, ag);
     path.arcToPoint(Offset(eg, ag), radius: Radius.circular(radius));
+
     return path.transform(Matrix4.rotationZ(rotation).storage).shift(offset);
   }
 
   Path _radiusTrianglePath(double width, double height, double radius) {
     final path = Path();
+    final rect = Offset.zero & Size(width, height);
     final radians = math.atan(width / 2 / height);
-    final topCorner = _radiansPath(radians, radius, offset: Offset(width / 2, 0));
+
+    final topCorner = _radiansPath(
+      radians,
+      radius,
+      rotation: 0,
+      offset: rect.topCenter,
+    );
     path.addPath(topCorner, Offset.zero);
 
-    var bounds = topCorner.getBounds();
-    path.moveTo(bounds.right, bounds.bottom);
+    final leftCorner = _radiansPath(
+      (math.pi / 2 + radians) / 2,
+      100,
+      rotation: math.pi - (math.pi / 2 - radians) / 2,
+      offset: rect.bottomLeft,
+    );
+    path.addPath(leftCorner, Offset.zero);
 
-    var rightCorner = _radiansPath(radians + math.pi / 2, radius, rotation: radians);
-    bounds = rightCorner.getBounds();
-    rightCorner = rightCorner.shift(Offset(width + bounds.right, height - bounds.height));
-
-    bounds = rightCorner.getBounds();
-    path.lineTo(bounds.left, bounds.top);
-
-    path.addPath(rightCorner, Offset.zero);
+    path.addPolygon([topCorner.getBounds().bottomLeft, leftCorner.getBounds().topRight], false);
+    path.addPolygon([leftCorner.getBounds().bottomLeft, rect.bottomCenter], false);
 
     var halfPath = path.transform(Matrix4.rotationY(math.pi).storage);
     halfPath = halfPath.shift(Offset(width, 0));
     path.addPath(halfPath, Offset.zero);
-
-    bounds = path.getBounds();
-    path.moveTo(bounds.left, bounds.bottom);
-    path.lineTo(bounds.right, bounds.bottom);
     return path;
   }
 }
