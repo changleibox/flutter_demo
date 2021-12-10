@@ -100,7 +100,6 @@ class _CornerTrianglePainter extends CustomPainter {
       graphical.trianglePath(width, height, radius),
       _paint..color = CupertinoColors.systemRed,
     );
-
     canvas.drawPath(
       graphical.trianglePath(width, height, radius, true),
       _paint..color = CupertinoColors.systemBlue,
