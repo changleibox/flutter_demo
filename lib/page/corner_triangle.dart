@@ -45,7 +45,6 @@ class _CornerTrianglePainter extends CustomPainter {
   _CornerTrianglePainter({
     required this.radius,
   }) : _paint = Paint()
-          ..color = CupertinoColors.black
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2;
 
@@ -60,18 +59,17 @@ class _CornerTrianglePainter extends CustomPainter {
     final path = Path();
     path.moveTo(0, 0);
     path.relativeLineTo(-width / 2, height);
-    path.relativeLineTo(width, 0);
+    path.relativeLineTo(-140, 0);
+    path.relativeLineTo(width + 280, 0);
+    path.relativeLineTo(-140, 0);
     path.close();
+    path.relativeLineTo(0, height);
 
+    _paint.color = CupertinoColors.separator;
     canvas.drawPath(
       path.shift(Offset(width / 2, 0)),
       _paint,
     );
-
-    _paint.color = CupertinoColors.separator;
-
-    canvas.drawLine(Offset(width / 2, 0), Offset(width / 2, height), _paint);
-    canvas.drawLine(Offset(-140, height), Offset(width + 140, height), _paint);
 
     final radians = math.atan(width / 2 / height);
     final topCornerRadius = radius;
@@ -94,6 +92,7 @@ class _CornerTrianglePainter extends CustomPainter {
 
     final pathRight = pathLeft.transform(Matrix4.rotationY(math.pi).storage).shift(Offset(width, 0));
 
+    _paint.color = CupertinoColors.activeGreen;
     canvas.drawPath(
       Path.combine(
         PathOperation.union,
@@ -103,20 +102,17 @@ class _CornerTrianglePainter extends CustomPainter {
       _paint,
     );
 
-    _paint.color = CupertinoColors.systemRed;
-    _paint.strokeWidth = 2;
-
     final path1 = _halfPath(width, height, radians, radius);
 
     final path2 = path1.transform(Matrix4.rotationY(math.pi).storage).shift(Offset(width, 0));
 
+    _paint.color = CupertinoColors.systemRed;
     canvas.drawPath(
       Path.combine(PathOperation.union, path1, path2),
       _paint,
     );
 
     _paint.color = CupertinoColors.activeBlue;
-
     canvas.drawPath(
       _trianglePath(width, height, radians, radius),
       _paint,
@@ -147,7 +143,7 @@ class _CornerTrianglePainter extends CustomPainter {
 
     final radians1 = bo1f + bo1e - math.pi / 2;
     final height1 = bf / math.tan(radians1);
-    final path = _halfPath(width, height1, radians1, radius).shift(Offset(0, -ai - _paint.strokeWidth / 2));
+    final path = _halfPath(width, height1, radians1, radius).shift(Offset(0, -ai - _paint.strokeWidth));
     return Path.combine(
       PathOperation.union,
       path,
