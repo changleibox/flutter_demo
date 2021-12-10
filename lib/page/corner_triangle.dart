@@ -33,10 +33,17 @@ class CornerTriangle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: const Size(200, 400),
-      painter: _CornerTrianglePainter(
-        radius: 20,
+    return InteractiveViewer(
+      alignPanAxis: true,
+      panEnabled: true,
+      scaleEnabled: true,
+      constrained: true,
+      clipBehavior: Clip.none,
+      child: CustomPaint(
+        size: const Size(200, 400),
+        painter: _CornerTrianglePainter(
+          radius: 20,
+        ),
       ),
     );
   }
