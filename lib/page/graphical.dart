@@ -74,7 +74,7 @@ Path cornerPath({
   void Function(Path path, RRect top, RRect left)? visitor,
 }) {
   if (avoidOffset) {
-    final offset = _counteractOffset(width, height, radius);
+    final offset = _noOffset(width, height, radius);
     return cornerPath(
       width: width,
       height: offset,
@@ -134,7 +134,7 @@ Path boundedPath({
 }
 
 /// 补偿
-double _counteractOffset(double width, double height, double radius) {
+double _noOffset(double width, double height, double radius) {
   final of = height - radius;
   final bf = width / 2;
   final bo = math.sqrt(math.pow(of, 2) + math.pow(bf, 2));
