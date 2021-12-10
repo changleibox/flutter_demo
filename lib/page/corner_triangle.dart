@@ -103,7 +103,6 @@ class _CornerTrianglePainter extends CustomPainter {
     );
 
     final path1 = _halfPath(width, height, radians, radius);
-
     final path2 = path1.transform(Matrix4.rotationY(math.pi).storage).shift(Offset(width, 0));
 
     _paint.color = CupertinoColors.systemRed;
@@ -117,8 +116,6 @@ class _CornerTrianglePainter extends CustomPainter {
       _trianglePath(width, height, radians, radius),
       _paint,
     );
-
-    canvas.drawPath(_trianglePath(width, height, radians, radius), _paint);
   }
 
   @override
