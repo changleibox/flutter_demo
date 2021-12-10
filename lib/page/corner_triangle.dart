@@ -34,7 +34,7 @@ class CornerTriangle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      size: const Size(400, 400),
+      size: const Size(200, 400),
       painter: _CornerTrianglePainter(
         radius: 20,
       ),
@@ -89,6 +89,10 @@ class _CornerTrianglePainter extends CustomPainter {
       graphical.circlePath(width, height, radius),
       _paint..color = CupertinoColors.activeGreen,
     );
+    canvas.drawPath(
+      graphical.circlePath(width, height, radius, true),
+      _paint..color = CupertinoColors.inactiveGray,
+    );
   }
 
   void _paintTriangle(Canvas canvas, double width, double height, double radius) {
@@ -97,9 +101,8 @@ class _CornerTrianglePainter extends CustomPainter {
       _paint..color = CupertinoColors.systemRed,
     );
 
-    final outerHeight = graphical.heightCompensate(width, height, radius);
     canvas.drawPath(
-      graphical.trianglePath(width, outerHeight, radius).shift(Offset(0, height - outerHeight)),
+      graphical.trianglePath(width, height, radius, true),
       _paint..color = CupertinoColors.systemBlue,
     );
   }
