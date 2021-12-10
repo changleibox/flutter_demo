@@ -45,6 +45,27 @@ double heightCompensate(double width, double height, [double radius = 0]) {
 }
 
 /// 创建元素path
+Rect pathBounds(
+  double radians,
+  double radius, {
+  double rotation = 0,
+  Offset offset = Offset.zero,
+  bool half = false,
+}) {
+  final ae = radius / math.tan(radians);
+  final ag = ae * math.cos(radians);
+  final eg = ae * math.sin(radians);
+  final ai = ae / math.cos(radians) - radius;
+
+  final matrix4 = Matrix4.rotationZ(rotation);
+  final rect = Rect.fromPoints(
+    Offset(-eg, ag),
+    Offset(half ? 0 : eg, half ? ai : ag),
+  );
+  return MatrixUtils.transformRect(matrix4, rect).shift(offset);
+}
+
+/// 创建元素path
 Path elementPath(
   double radians,
   double radius, {
