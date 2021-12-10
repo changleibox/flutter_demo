@@ -27,11 +27,11 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.3
+  cupertino_icons: ^1.0.4
   fling:
     git: https://github.com.cnpmjs.org/changleibox/fling.git
   cavity_mask:
-    git: https://github.com.cnpmjs.org/changleibox/cavity_mask.git
+    path: /Users/changlei/Downloads/FlutterWorkspace/cavity_mask
 
 dev_dependencies:
   flutter_test:

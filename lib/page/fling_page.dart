@@ -39,7 +39,6 @@ class _FlingPageState extends State<FlingPage> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        backgroundColor: Colors.white,
         middle: const Text('Fling示例'),
         trailing: _FlingBlock(
           tag: 4,

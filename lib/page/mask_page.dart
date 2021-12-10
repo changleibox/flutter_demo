@@ -1,6 +1,8 @@
 import 'package:cavity_mask/cavity_mask.dart';
 import 'package:flutter/cupertino.dart';
 
+const _itemCount = 20;
+
 /// Created by box on 2021/12/4.
 ///
 /// 自定义遮罩
@@ -74,7 +76,7 @@ class _MaskPageState extends State<MaskPage> {
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: List.generate(100 - 1, (index) {
+                  children: List.generate(_itemCount * 2 - 1, (index) {
                     if (index.isEven) {
                       return _buildChild(index ~/ 2);
                     } else {
