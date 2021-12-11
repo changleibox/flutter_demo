@@ -46,23 +46,14 @@ Path cornerPath({
   bool avoidOffset = false,
   void Function(Path path, ArcPoint top, ArcPoint left, ArcPoint right)? visitor,
 }) {
-  if (avoidOffset) {
-    final offset = _noOffset(width, height, radius);
-    return cornerPath(
-      width: width,
-      height: offset,
-      radius: radius,
-      visitor: visitor,
-      avoidOffset: false,
-    ).shift(Offset(0, height - offset));
-  }
-  final radians = math.atan(width / 2 / height);
+  final size = Size(width, height);
   final topRadius = radius;
   final leftRadius = radius * 6;
+  final radians = size.semiRadians;
 
-  final top = ArcPoint.from(radians, topRadius).shift(Offset(width / 2, 0));
+  final top = ArcPoint.fromSize(size, topRadius, avoidOffset: avoidOffset).shift(Offset(width / 2, 0));
 
-  final left = ArcPoint.from((math.pi / 2 + radians) / 2, leftRadius)
+  final left = ArcPoint.fromRadians((math.pi / 2 + radians) / 2, leftRadius)
       .rotationZ(math.pi - (math.pi / 2 - radians) / 2)
       .shift(Offset(0, height));
 
@@ -73,37 +64,39 @@ Path cornerPath({
   return path;
 }
 
-/// 补偿
-double _noOffset(double width, double height, double radius) {
-  final bf = width / 2;
-  final of = height - radius;
-  final offset = Offset(of, bf);
-  final bof = offset.direction;
-  final boe = math.acos(radius / offset.distance);
-  return bf / math.tan(bof + boe - math.pi / 2);
-}
-
 /// 绘制圆弧的坐标信息
 class ArcPoint {
   /// 构造[ArcPoint]，[begin]和[end]分别为角内切圆与两边的切点，[middle]为角平分线与内切圆的交点
-  ArcPoint({
+  ArcPoint._({
     required this.begin,
     required this.middle,
     required this.end,
   }) : center = middle.center(begin, end);
 
   /// 根据一个角度和角内切圆的半径构建一个[ArcPoint]，[radians]为角对应的弧度，[radius]内切圆半径
-  factory ArcPoint.from(double radians, double radius) {
+  factory ArcPoint.fromRadians(double radians, double radius) {
     final ae = radius / math.tan(radians);
     final ag = ae * math.cos(radians);
     final eg = ae * math.sin(radians);
     final ai = ae / math.cos(radians) - radius;
 
-    return ArcPoint(
+    return ArcPoint._(
       begin: Offset(-eg, ag),
       middle: Offset(0, ai),
       end: Offset(eg, ag),
     );
+  }
+
+  /// 根据一个角度和角内切圆的半径构建一个[ArcPoint]，[radians]为角对应的弧度，[radius]内切圆半径
+  factory ArcPoint.fromSize(Size size, double radius, {bool avoidOffset = false}) {
+    final width = size.width;
+    final height = size.height;
+    var offsetHeight = height;
+    if (avoidOffset) {
+      offsetHeight = ArcPoint.avoidOffset(size, radius);
+    }
+    final radians = Size(width, offsetHeight).semiRadians;
+    return ArcPoint.fromRadians(radians, radius).shift(Offset(0, height - offsetHeight));
   }
 
   /// start point
@@ -141,7 +134,7 @@ class ArcPoint {
   /// To translate a rectangle by separate x and y components rather than by an
   /// [Offset], consider [translate].
   ArcPoint shift(Offset offset) {
-    return ArcPoint(
+    return ArcPoint._(
       begin: begin + offset,
       middle: middle + offset,
       end: end + offset,
@@ -150,7 +143,7 @@ class ArcPoint {
 
   /// 绕着Z轴顺时针旋转[radians]
   ArcPoint rotationX(double radians) {
-    return ArcPoint(
+    return ArcPoint._(
       begin: begin.rotationX(radians),
       middle: middle.rotationX(radians),
       end: end.rotationX(radians),
@@ -159,7 +152,7 @@ class ArcPoint {
 
   /// 绕着Z轴顺时针旋转[radians]
   ArcPoint rotationY(double radians) {
-    return ArcPoint(
+    return ArcPoint._(
       begin: begin.rotationY(radians),
       middle: middle.rotationY(radians),
       end: end.rotationY(radians),
@@ -168,11 +161,19 @@ class ArcPoint {
 
   /// 绕着Z轴顺时针旋转[radians]
   ArcPoint rotationZ(double radians) {
-    return ArcPoint(
+    return ArcPoint._(
       begin: begin.rotationZ(radians),
       middle: middle.rotationZ(radians),
       end: end.rotationZ(radians),
     );
+  }
+
+  /// 补偿
+  static double avoidOffset(Size size, double radius) {
+    size = Size(size.width / 2, size.height - radius);
+    final bof = size.radians;
+    final boe = math.acos(radius / size.distance);
+    return size.width / math.tan(bof + boe - math.pi / 2);
   }
 
   @override
@@ -186,6 +187,21 @@ class ArcPoint {
 
   @override
   int get hashCode => begin.hashCode ^ middle.hashCode ^ end.hashCode;
+}
+
+/// 扩展Size
+extension SizeExtension on Size {
+  /// 半角
+  double get semiRadians => flipped.centerRight(Offset.zero).direction;
+
+  /// 半角
+  double get radians => flipped.bottomRight(Offset.zero).direction;
+
+  /// The magnitude of the offset.
+  ///
+  /// If you need this value to compare it to another [Offset]'s distance,
+  /// consider using [distanceSquared] instead, since it is cheaper to compute.
+  double get distance => bottomRight(Offset.zero).distance;
 }
 
 /// 扩展Offset
