@@ -53,9 +53,9 @@ Path cornerPath({
 
   final top = ArcPoint.fromSize(size, topRadius, avoidOffset: avoidOffset).shift(Offset(width / 2, 0));
 
-  final left = ArcPoint.fromRadians((math.pi / 2 + radians) / 2, leftRadius)
-      .rotationZ(math.pi - (math.pi / 2 - radians) / 2)
-      .shift(Offset(0, height));
+  final leftRadians = (math.pi / 2 + radians) / 2;
+  final leftRotation = math.pi / 2 + leftRadians;
+  final left = ArcPoint.fromRadians(leftRadians, leftRadius).rotationZ(leftRotation).shift(Offset(0, height));
 
   final right = left.rotationY(math.pi).shift(Offset(width, 0));
 
