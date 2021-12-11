@@ -16,11 +16,7 @@ Path circlePath(double width, double height, double radius, [bool avoidOffset = 
       path.addOval(left.circle);
     },
   );
-  return Path.combine(
-    PathOperation.union,
-    path,
-    path.rotationY(math.pi).shift(Offset(width, 0)),
-  );
+  return path.mirrorY(width / 2);
 }
 
 /// 三角形
@@ -39,11 +35,7 @@ Path trianglePath(double width, double height, [double radius = 0, bool avoidOff
       path.close();
     },
   );
-  return Path.combine(
-    PathOperation.union,
-    path,
-    path.rotationY(math.pi).shift(Offset(width, 0)),
-  );
+  return path.mirrorY(width / 2);
 }
 
 /// 创建各个角
@@ -254,5 +246,14 @@ extension PathExtension on Path {
   /// [Matrix4.rotationZ]
   Path rotationZ(double radians) {
     return transform(Matrix4.rotationZ(radians).storage);
+  }
+
+  /// 沿着Y轴做镜像
+  Path mirrorY(double from) {
+    return Path.combine(
+      PathOperation.union,
+      this,
+      rotationY(math.pi).shift(Offset(from * 2, 0)),
+    );
   }
 }
