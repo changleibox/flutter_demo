@@ -27,10 +27,10 @@ Path trianglePath(double width, double height, [double radius = 0, bool avoidOff
     radius: radius,
     avoidOffset: avoidOffset,
     visitor: (path, top, left, right) {
-      path.moveTo(top.middle.dx, top.middle.dy);
-      path.arcToPoint(top.begin, radius: Radius.circular(top.radius), clockwise: false);
-      path.lineTo(left.begin.dx, left.begin.dy);
-      path.arcToPoint(left.end, radius: Radius.circular(left.radius), clockwise: true);
+      top.middle.moveTo(path);
+      top.begin.arcToPoint(path, radius: Radius.circular(top.radius), clockwise: false);
+      left.begin.lineTo(path);
+      left.end.arcToPoint(path, radius: Radius.circular(left.radius), clockwise: true);
       path.lineTo(top.middle.dx, left.end.dy);
       path.close();
     },
@@ -228,6 +228,33 @@ extension OffsetExtension on Offset {
     final dx = (b * f - e * c) / (b * d - e * a);
     final dy = (d * c - a * f) / (b * d - e * a);
     return Offset(dx, dy);
+  }
+
+  /// [Path.moveTo]
+  void moveTo(Path path) {
+    path.moveTo(dx, dy);
+  }
+
+  /// [Path.lineTo]
+  void lineTo(Path path) {
+    path.lineTo(dx, dy);
+  }
+
+  /// [Path.arcToPoint]
+  void arcToPoint(
+    Path path, {
+    Radius radius = Radius.zero,
+    double rotation = 0.0,
+    bool largeArc = false,
+    bool clockwise = true,
+  }) {
+    path.arcToPoint(
+      this,
+      radius: radius,
+      rotation: rotation,
+      largeArc: largeArc,
+      clockwise: clockwise,
+    );
   }
 }
 
