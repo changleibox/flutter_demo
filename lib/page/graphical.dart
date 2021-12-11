@@ -132,6 +132,18 @@ class ArcPoint {
   /// 内切圆
   Rect get circle => Rect.fromCircle(center: center, radius: radius);
 
+  /// 边界
+  Rect get bounds {
+    final dxs = [begin.dx, middle.dx, end.dx];
+    final dys = [begin.dy, middle.dy, end.dy];
+    return Rect.fromLTRB(
+      dxs.reduce(math.min),
+      dys.reduce(math.min),
+      dxs.reduce(math.max),
+      dys.reduce(math.max),
+    );
+  }
+
   /// Returns a new [ArcPoint] translated by the given offset.
   ///
   /// To translate a rectangle by separate x and y components rather than by an
