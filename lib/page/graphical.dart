@@ -118,7 +118,7 @@ Path boundedPath({
   required double radius,
   double rotation = 0,
   Offset offset = Offset.zero,
-  bool avoidOffset = false,
+  bool clockwise = true,
 }) {
   final ae = radius / math.tan(radians);
   final ag = ae * math.cos(radians);
@@ -129,6 +129,7 @@ Path boundedPath({
   path.arcToPoint(
     Offset(eg, ag),
     radius: Radius.circular(radius),
+    clockwise: clockwise,
   );
   return path.rotationZ(rotation).shift(offset);
 }
