@@ -87,7 +87,7 @@ class ArcPoint {
     );
   }
 
-  /// 根据一个角度和角内切圆的半径构建一个[ArcPoint]，[radians]为角对应的弧度，[radius]内切圆半径
+  /// 根据一个角度和角内切圆的半径构建一个[ArcPoint]，以[size]作为等腰三角形的底和高计算顶角的弧度，[radius]内切圆半径
   factory ArcPoint.fromSize(Size size, double radius, {bool avoidOffset = false}) {
     final width = size.width;
     final height = size.height;
