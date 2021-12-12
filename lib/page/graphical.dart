@@ -217,6 +217,26 @@ class ArcPoint {
     return size.width / math.tan(bof + boe - radians90);
   }
 
+  /// 根据圆上三个点计算圆心
+  static Offset centerOf(Offset point1, Offset point2, Offset point3) {
+    final x1 = point1.dx;
+    final y1 = point1.dy;
+    final x2 = point2.dx;
+    final y2 = point2.dy;
+    final x3 = point3.dx;
+    final y3 = point3.dy;
+
+    final a = 2 * (x2 - x1);
+    final b = 2 * (y2 - y1);
+    final c = math.pow(x2, 2) + math.pow(y2, 2) - math.pow(x1, 2) - math.pow(y1, 2);
+    final d = 2 * (x3 - x2);
+    final e = 2 * (y3 - y2);
+    final f = math.pow(x3, 2) + math.pow(y3, 2) - math.pow(x2, 2) - math.pow(y2, 2);
+    final dx = (b * f - e * c) / (b * d - e * a);
+    final dy = (d * c - a * f) / (b * d - e * a);
+    return Offset(dx, dy);
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -228,26 +248,6 @@ class ArcPoint {
 
   @override
   int get hashCode => begin.hashCode ^ middle.hashCode ^ end.hashCode;
-}
-
-/// 根据圆上三个点计算圆心
-Offset centerOf(Offset point1, Offset point2, Offset point3) {
-  final x1 = point1.dx;
-  final y1 = point1.dy;
-  final x2 = point2.dx;
-  final y2 = point2.dy;
-  final x3 = point3.dx;
-  final y3 = point3.dy;
-
-  final a = 2 * (x2 - x1);
-  final b = 2 * (y2 - y1);
-  final c = math.pow(x2, 2) + math.pow(y2, 2) - math.pow(x1, 2) - math.pow(y1, 2);
-  final d = 2 * (x3 - x2);
-  final e = 2 * (y3 - y2);
-  final f = math.pow(x3, 2) + math.pow(y3, 2) - math.pow(x2, 2) - math.pow(y2, 2);
-  final dx = (b * f - e * c) / (b * d - e * a);
-  final dy = (d * c - a * f) / (b * d - e * a);
-  return Offset(dx, dy);
 }
 
 /// 扩展Size
