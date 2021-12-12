@@ -56,7 +56,7 @@ Path cornerPath({
   required double height,
   required double radius,
   bool avoidOffset = false,
-  void Function(Path path, ArcPoint top, ArcPoint left, ArcPoint right)? visitor,
+  void Function(Path path, Incircle top, Incircle left, Incircle right)? visitor,
 }) {
   final size = Size(width, height);
   final topRadius = radius;
@@ -64,12 +64,12 @@ Path cornerPath({
 
   final topRadians = size.semiRadians;
   final topOffset = Offset(width / 2, 0);
-  final top = ArcPoint.fromSize(size, topRadius, avoidOffset: avoidOffset).shift(topOffset);
+  final top = Incircle.fromSize(size, topRadius, avoidOffset: avoidOffset).shift(topOffset);
 
   final leftRadians = (radians90 + topRadians) / 2;
   final leftRotation = radians90 + leftRadians;
   final leftOffset = Offset(0, height);
-  final left = ArcPoint.fromRadians(leftRadians, leftRadius).rotationZ(leftRotation).shift(leftOffset);
+  final left = Incircle.fromRadians(leftRadians, leftRadius).rotationZ(leftRotation).shift(leftOffset);
 
   final right = left.rotationY(radians180).shift(Offset(width, 0)).flipped;
 
@@ -79,37 +79,37 @@ Path cornerPath({
 }
 
 /// 角的指定半径的内切圆
-class ArcPoint {
-  /// 构造[ArcPoint]，[begin]和[end]分别为角内切圆与两边的切点，[middle]为角平分线与内切圆的交点
-  ArcPoint._({
+class Incircle {
+  /// 构造[Incircle]，[begin]和[end]分别为角内切圆与两边的切点，[middle]为角平分线与内切圆的交点
+  Incircle._({
     required this.begin,
     required this.middle,
     required this.end,
   }) : center = centerOf(begin, end, middle);
 
-  /// 根据一个角度和角内切圆的半径构建一个[ArcPoint]，[radians]为角对应的弧度，[radius]内切圆半径
-  factory ArcPoint.fromRadians(double radians, double radius) {
+  /// 根据一个角度和角内切圆的半径构建一个[Incircle]，[radians]为角对应的弧度，[radius]内切圆半径
+  factory Incircle.fromRadians(double radians, double radius) {
     final eg = radius * math.cos(radians);
     final ai = radius / math.sin(radians) - radius;
     final ag = ai + radius - radius * math.sin(radians);
 
-    return ArcPoint._(
+    return Incircle._(
       begin: Offset(-eg, ag),
       middle: Offset(0, ai),
       end: Offset(eg, ag),
     );
   }
 
-  /// 根据一个角度和角内切圆的半径构建一个[ArcPoint]，以[size]作为等腰三角形的底和高计算顶角的弧度，[radius]内切圆半径
-  factory ArcPoint.fromSize(Size size, double radius, {bool avoidOffset = false}) {
+  /// 根据一个角度和角内切圆的半径构建一个[Incircle]，以[size]作为等腰三角形的底和高计算顶角的弧度，[radius]内切圆半径
+  factory Incircle.fromSize(Size size, double radius, {bool avoidOffset = false}) {
     final width = size.width;
     final height = size.height;
     var offsetHeight = height;
     if (avoidOffset) {
-      offsetHeight = ArcPoint.offsetOf(size, radius);
+      offsetHeight = Incircle.offsetOf(size, radius);
     }
     final radians = Size(width, offsetHeight).semiRadians;
-    return ArcPoint.fromRadians(radians, radius).shift(Offset(0, height - offsetHeight));
+    return Incircle.fromRadians(radians, radius).shift(Offset(0, height - offsetHeight));
   }
 
   /// start point
@@ -161,12 +161,12 @@ class ArcPoint {
     );
   }
 
-  /// Returns a new [ArcPoint] translated by the given offset.
+  /// Returns a new [Incircle] translated by the given offset.
   ///
   /// To translate a rectangle by separate x and y components rather than by an
   /// [Offset], consider [translate].
-  ArcPoint shift(Offset offset) {
-    return ArcPoint._(
+  Incircle shift(Offset offset) {
+    return Incircle._(
       begin: begin + offset,
       middle: middle + offset,
       end: end + offset,
@@ -174,8 +174,8 @@ class ArcPoint {
   }
 
   /// 绕着Z轴顺时针旋转[radians]
-  ArcPoint rotationX(double radians) {
-    return ArcPoint._(
+  Incircle rotationX(double radians) {
+    return Incircle._(
       begin: begin.rotationX(radians),
       middle: middle.rotationX(radians),
       end: end.rotationX(radians),
@@ -183,8 +183,8 @@ class ArcPoint {
   }
 
   /// 绕着Z轴顺时针旋转[radians]
-  ArcPoint rotationY(double radians) {
-    return ArcPoint._(
+  Incircle rotationY(double radians) {
+    return Incircle._(
       begin: begin.rotationY(radians),
       middle: middle.rotationY(radians),
       end: end.rotationY(radians),
@@ -192,8 +192,8 @@ class ArcPoint {
   }
 
   /// 绕着Z轴顺时针旋转[radians]
-  ArcPoint rotationZ(double radians) {
-    return ArcPoint._(
+  Incircle rotationZ(double radians) {
+    return Incircle._(
       begin: begin.rotationZ(radians),
       middle: middle.rotationZ(radians),
       end: end.rotationZ(radians),
@@ -201,8 +201,8 @@ class ArcPoint {
   }
 
   /// 绕着角平分线旋转180度
-  ArcPoint get flipped {
-    return ArcPoint._(
+  Incircle get flipped {
+    return Incircle._(
       begin: end,
       middle: middle,
       end: begin,
@@ -240,7 +240,7 @@ class ArcPoint {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ArcPoint &&
+      other is Incircle &&
           runtimeType == other.runtimeType &&
           begin == other.begin &&
           middle == other.middle &&
