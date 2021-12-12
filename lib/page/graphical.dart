@@ -117,6 +117,23 @@ class ArcPoint {
   /// 内切圆
   Rect get circle => Rect.fromCircle(center: center, radius: radius);
 
+  /// 角的弧度
+  double get radians {
+    final distance = (begin - middle).distance / 2;
+    return 2 * math.acos(distance / radius) - math.pi / 2;
+  }
+
+  /// 旋转的弧度
+  double get rotation {
+    return ((begin - end).direction + math.pi) % (2 * math.pi);
+  }
+
+  /// 原点
+  Offset get origin {
+    final offset = middle.rotationZ(-rotation);
+    return Offset(offset.dx, offset.dy + radius - radius / math.sin(radians));
+  }
+
   /// 边界
   Rect get bounds {
     final dxs = [begin.dx, middle.dx, end.dx];
