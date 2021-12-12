@@ -133,8 +133,7 @@ class ArcPoint {
 
   /// 角的弧度
   double get radians {
-    final distance = (begin - end).distance / 2;
-    return math.acos(distance / radius) % radians360;
+    return math.acos((begin - end).distance / (2 * radius)) % radians360;
   }
 
   /// 旋转的弧度
