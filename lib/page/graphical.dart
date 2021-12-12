@@ -142,10 +142,10 @@ class ArcPoint {
 
   /// 角的顶点
   Offset get vertex {
-    final dy = radius / math.sin(radians);
+    final dy = radius / math.sin(radians) - radius;
     return Offset(
-      (center.dx + dy * math.sin(rotation)).exact,
-      (center.dy - dy * math.cos(rotation)).exact,
+      middle.dx + dy * math.sin(rotation),
+      middle.dy - dy * math.cos(rotation),
     );
   }
 
