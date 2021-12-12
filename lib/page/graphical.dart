@@ -106,7 +106,7 @@ class ArcPoint {
     final height = size.height;
     var offsetHeight = height;
     if (avoidOffset) {
-      offsetHeight = ArcPoint.avoidOffset(size, radius);
+      offsetHeight = ArcPoint.offsetOf(size, radius);
     }
     final radians = Size(width, offsetHeight).semiRadians;
     return ArcPoint.fromRadians(radians, radius).shift(Offset(0, height - offsetHeight));
@@ -209,8 +209,8 @@ class ArcPoint {
     );
   }
 
-  /// 补偿
-  static double avoidOffset(Size size, double radius) {
+  /// 修正因内切圆造成的位移
+  static double offsetOf(Size size, double radius) {
     size = Size(size.width / 2, size.height - radius);
     final bof = size.radians;
     final boe = math.acos(radius / size.distance);
