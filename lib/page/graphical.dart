@@ -139,7 +139,7 @@ class ArcPoint {
 
   /// 旋转的弧度
   double get rotation {
-    return ((begin - end).direction + radians180) % radians360;
+    return (end - begin).direction % radians360;
   }
 
   /// 角的顶点
