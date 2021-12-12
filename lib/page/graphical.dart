@@ -142,8 +142,8 @@ class ArcPoint {
     return ((begin - end).direction + radians180) % radians360;
   }
 
-  /// 原点
-  Offset get origin {
+  /// 角的顶点
+  Offset get vertex {
     final dy = radius / math.sin(radians);
     return Offset(
       (center.dx + dy * math.sin(rotation)).exact,
