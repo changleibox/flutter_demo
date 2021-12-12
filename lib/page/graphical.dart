@@ -2,6 +2,15 @@ import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 
+/// 180度对应的弧度
+const radians180 = math.pi;
+
+/// 90度对应的弧度
+const radians90 = math.pi / 2;
+
+/// 360度对应的弧度
+const radians360 = math.pi * 2;
+
 /// Created by changlei on 2021/12/10.
 ///
 /// 计算各种图形
@@ -54,12 +63,12 @@ Path cornerPath({
   final topOffset = Offset(width / 2, 0);
   final top = ArcPoint.fromSize(size, topRadius, avoidOffset: avoidOffset).shift(topOffset);
 
-  final leftRadians = (math.pi / 2 + topRadians) / 2;
-  final leftRotation = math.pi / 2 + leftRadians;
+  final leftRadians = (radians90 + topRadians) / 2;
+  final leftRotation = radians90 + leftRadians;
   final leftOffset = Offset(0, height);
   final left = ArcPoint.fromRadians(leftRadians, leftRadius).rotationZ(leftRotation).shift(leftOffset);
 
-  final right = left.rotationY(math.pi).shift(Offset(width, 0));
+  final right = left.rotationY(radians180).shift(Offset(width, 0));
 
   final path = Path();
   visitor?.call(path, top, left, right);
@@ -122,12 +131,12 @@ class ArcPoint {
   /// 角的弧度
   double get radians {
     final distance = (begin - middle).distance / 2;
-    return 2 * math.acos(distance / radius) - math.pi / 2;
+    return (2 * math.acos(distance / radius) - radians90) % radians360;
   }
 
   /// 旋转的弧度
   double get rotation {
-    return ((begin - end).direction + math.pi) % (2 * math.pi);
+    return ((begin - end).direction + radians180) % radians360;
   }
 
   /// 原点
@@ -195,7 +204,7 @@ class ArcPoint {
     size = Size(size.width / 2, size.height - radius);
     final bof = size.radians;
     final boe = math.acos(radius / size.distance);
-    return size.width / math.tan(bof + boe - math.pi / 2);
+    return size.width / math.tan(bof + boe - radians90);
   }
 
   @override
@@ -318,7 +327,7 @@ extension PathExtension on Path {
     return Path.combine(
       PathOperation.union,
       this,
-      rotationY(math.pi).shift(Offset(from * 2, 0)),
+      rotationY(radians180).shift(Offset(from * 2, 0)),
     );
   }
 }
