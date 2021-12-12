@@ -78,7 +78,7 @@ Path cornerPath({
   return path;
 }
 
-/// 绘制圆弧的坐标信息
+/// 角的指定半径的内切圆
 class ArcPoint {
   /// 构造[ArcPoint]，[begin]和[end]分别为角内切圆与两边的切点，[middle]为角平分线与内切圆的交点
   ArcPoint._({
