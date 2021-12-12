@@ -71,7 +71,7 @@ Path cornerPath({
   final leftOffset = Offset(0, height);
   final left = ArcPoint.fromRadians(leftRadians, leftRadius).rotationZ(leftRotation).shift(leftOffset);
 
-  final right = left.rotationY(radians180).shift(Offset(width, 0));
+  final right = left.rotationY(radians180).shift(Offset(width, 0)).flipped;
 
   final path = Path();
   visitor?.call(path, top, left, right);
@@ -199,6 +199,15 @@ class ArcPoint {
       begin: begin.rotationZ(radians),
       middle: middle.rotationZ(radians),
       end: end.rotationZ(radians),
+    );
+  }
+
+  /// 绕着角平分线旋转180度
+  ArcPoint get flipped {
+    return ArcPoint._(
+      begin: end,
+      middle: middle,
+      end: begin,
     );
   }
 
