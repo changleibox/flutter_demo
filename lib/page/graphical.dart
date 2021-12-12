@@ -132,7 +132,11 @@ class ArcPoint {
 
   /// 原点
   Offset get origin {
-    return center - Offset(0, radius / math.sin(radians)).rotationZ(rotation);
+    final dy = radius / math.sin(radians);
+    return Offset(
+      center.dx + dy * math.sin(rotation),
+      center.dy - dy * math.cos(rotation),
+    );
   }
 
   /// 边界
