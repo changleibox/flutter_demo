@@ -112,19 +112,19 @@ class Incircle {
     return Incircle.fromRadians(radians, radius).shift(Offset(0, height - offsetHeight));
   }
 
-  /// start point
+  /// 内切圆的左切点
   final Offset begin;
 
-  /// middle point
+  /// 角平分线与内切圆相交的的近点
   final Offset middle;
 
-  /// end point
+  /// 内切圆的右切点
   final Offset end;
 
-  /// 圆心
+  /// 内切圆圆心
   final Offset center;
 
-  /// radius
+  /// 内切圆半径
   double get radius => (center - middle).distance.abs();
 
   /// 内切圆
