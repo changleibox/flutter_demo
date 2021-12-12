@@ -89,10 +89,9 @@ class ArcPoint {
 
   /// 根据一个角度和角内切圆的半径构建一个[ArcPoint]，[radians]为角对应的弧度，[radius]内切圆半径
   factory ArcPoint.fromRadians(double radians, double radius) {
-    final ae = radius / math.tan(radians);
-    final ag = ae * math.cos(radians);
-    final eg = ae * math.sin(radians);
-    final ai = ae / math.cos(radians) - radius;
+    final eg = radius * math.cos(radians);
+    final ai = radius / math.sin(radians) - radius;
+    final ag = ai + radius - radius * math.sin(radians);
 
     return ArcPoint._(
       begin: Offset(-eg, ag),
