@@ -49,13 +49,15 @@ Path cornerPath({
   final size = Size(width, height);
   final topRadius = radius;
   final leftRadius = radius * 6;
-  final radians = size.semiRadians;
 
-  final top = ArcPoint.fromSize(size, topRadius, avoidOffset: avoidOffset).shift(Offset(width / 2, 0));
+  final topRadians = size.semiRadians;
+  final topOffset = Offset(width / 2, 0);
+  final top = ArcPoint.fromSize(size, topRadius, avoidOffset: avoidOffset).shift(topOffset);
 
-  final leftRadians = (math.pi / 2 + radians) / 2;
+  final leftRadians = (math.pi / 2 + topRadians) / 2;
   final leftRotation = math.pi / 2 + leftRadians;
-  final left = ArcPoint.fromRadians(leftRadians, leftRadius).rotationZ(leftRotation).shift(Offset(0, height));
+  final leftOffset = Offset(0, height);
+  final left = ArcPoint.fromRadians(leftRadians, leftRadius).rotationZ(leftRotation).shift(leftOffset);
 
   final right = left.rotationY(math.pi).shift(Offset(width, 0));
 
