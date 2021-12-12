@@ -2,6 +2,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 
+/// 最小精度
+const minAccuracy = 1e+10;
+
 /// 180度对应的弧度
 const radians180 = math.pi;
 
@@ -143,8 +146,8 @@ class ArcPoint {
   Offset get origin {
     final dy = radius / math.sin(radians);
     return Offset(
-      center.dx + dy * math.sin(rotation),
-      center.dy - dy * math.cos(rotation),
+      (center.dx + dy * math.sin(rotation)).exact,
+      (center.dy - dy * math.cos(rotation)).exact,
     );
   }
 
@@ -303,6 +306,12 @@ extension OffsetExtension on Offset {
       clockwise: clockwise,
     );
   }
+}
+
+/// 扩展double
+extension DoubleExtension on double {
+  /// 修复精度，省略10位小数后的值
+  double get exact => (this * minAccuracy).toInt() / minAccuracy;
 }
 
 /// 扩展path
