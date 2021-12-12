@@ -85,7 +85,7 @@ class ArcPoint {
     required this.begin,
     required this.middle,
     required this.end,
-  }) : center = middle.center(begin, end);
+  }) : center = centerOf(begin, end, middle);
 
   /// 根据一个角度和角内切圆的半径构建一个[ArcPoint]，[radians]为角对应的弧度，[radius]内切圆半径
   factory ArcPoint.fromRadians(double radians, double radius) {
@@ -230,6 +230,26 @@ class ArcPoint {
   int get hashCode => begin.hashCode ^ middle.hashCode ^ end.hashCode;
 }
 
+/// 根据圆上三个点计算圆心
+Offset centerOf(Offset point1, Offset point2, Offset point3) {
+  final x1 = point1.dx;
+  final y1 = point1.dy;
+  final x2 = point2.dx;
+  final y2 = point2.dy;
+  final x3 = point3.dx;
+  final y3 = point3.dy;
+
+  final a = 2 * (x2 - x1);
+  final b = 2 * (y2 - y1);
+  final c = math.pow(x2, 2) + math.pow(y2, 2) - math.pow(x1, 2) - math.pow(y1, 2);
+  final d = 2 * (x3 - x2);
+  final e = 2 * (y3 - y2);
+  final f = math.pow(x3, 2) + math.pow(y3, 2) - math.pow(x2, 2) - math.pow(y2, 2);
+  final dx = (b * f - e * c) / (b * d - e * a);
+  final dy = (d * c - a * f) / (b * d - e * a);
+  return Offset(dx, dy);
+}
+
 /// 扩展Size
 extension SizeExtension on Size {
   /// 半角
@@ -265,26 +285,6 @@ extension OffsetExtension on Offset {
       dx * cos - dy * sin,
       dy * cos + dx * sin,
     );
-  }
-
-  /// 根据圆上三个点计算圆心
-  Offset center(Offset point1, Offset point2) {
-    final x1 = point1.dx;
-    final y1 = point1.dy;
-    final x2 = point2.dx;
-    final y2 = point2.dy;
-    final x3 = this.dx;
-    final y3 = this.dy;
-
-    final a = 2 * (x2 - x1);
-    final b = 2 * (y2 - y1);
-    final c = math.pow(x2, 2) + math.pow(y2, 2) - math.pow(x1, 2) - math.pow(y1, 2);
-    final d = 2 * (x3 - x2);
-    final e = 2 * (y3 - y2);
-    final f = math.pow(x3, 2) + math.pow(y3, 2) - math.pow(x2, 2) - math.pow(y2, 2);
-    final dx = (b * f - e * c) / (b * d - e * a);
-    final dy = (d * c - a * f) / (b * d - e * a);
-    return Offset(dx, dy);
   }
 
   /// [Path.moveTo]
