@@ -11,39 +11,62 @@ const radians180 = math.pi;
 /// 90度对应的弧度
 const radians90 = math.pi / 2;
 
+/// 90度对应的弧度
+const radians270 = math.pi * 3 / 2;
+
 /// 360度对应的弧度
 const radians360 = math.pi * 2;
 
 /// Created by changlei on 2021/12/10.
 ///
 /// 计算各种图形
-Path circlePath(double width, double height, double radius, [bool avoidOffset = false]) {
+Path circlePath({
+  required double width,
+  required double height,
+  required double radius,
+  double? blRadius,
+  double? brRadius,
+  bool avoidOffset = false,
+}) {
   final path = cornerPath(
     width: width,
     height: height,
     radius: radius,
+    blRadius: blRadius,
+    brRadius: brRadius,
     avoidOffset: avoidOffset,
     visitor: (path, top, left, right) {
       path.addOval(top.circle);
       path.addOval(left.circle);
+      path.addOval(right.circle);
     },
   );
   return path.mirrorY(width / 2);
 }
 
 /// 三角形
-Path trianglePath(double width, double height, [double radius = 0, bool avoidOffset = false]) {
+Path trianglePath({
+  required double width,
+  required double height,
+  double radius = 0,
+  double? blRadius,
+  double? brRadius,
+  bool avoidOffset = false,
+}) {
   final path = cornerPath(
     width: width,
     height: height,
     radius: radius,
+    blRadius: blRadius,
+    brRadius: brRadius,
     avoidOffset: avoidOffset,
     visitor: (path, top, left, right) {
       top.middle.moveTo(path);
       top.begin.arcToPoint(path, radius: Radius.circular(top.radius), clockwise: false);
       left.begin.lineTo(path);
       left.end.arcToPoint(path, radius: Radius.circular(left.radius), clockwise: true);
-      path.lineTo(top.middle.dx, left.end.dy);
+      right.begin.lineTo(path);
+      right.end.arcToPoint(path, radius: Radius.circular(right.radius), clockwise: true);
       path.close();
     },
   );
@@ -55,12 +78,15 @@ Path cornerPath({
   required double width,
   required double height,
   required double radius,
+  double? blRadius,
+  double? brRadius,
   bool avoidOffset = false,
   void Function(Path path, Incircle top, Incircle left, Incircle right)? visitor,
 }) {
   final size = Size(width, height);
   final topRadius = radius;
-  final leftRadius = radius * 6;
+  final leftRadius = blRadius ?? radius;
+  final rightRadius = brRadius ?? radius;
 
   final topRadians = size.semiRadians;
   final topOffset = Offset(width / 2, 0);
@@ -71,7 +97,10 @@ Path cornerPath({
   final leftOffset = Offset(0, height);
   final left = Incircle.fromRadians(leftRadians, leftRadius).rotationZ(leftRotation).shift(leftOffset);
 
-  final right = left.rotationY(radians180).shift(Offset(width, 0)).flipped;
+  final rightRadians = (radians90 + topRadians) / 2;
+  final rightRotation = radians270 - leftRadians;
+  final rightOffset = Offset(width, height);
+  final right = Incircle.fromRadians(rightRadians, rightRadius).rotationZ(rightRotation).shift(rightOffset);
 
   final path = Path();
   visitor?.call(path, top, left, right);

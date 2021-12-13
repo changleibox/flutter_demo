@@ -82,6 +82,7 @@ class _CornerTrianglePainter extends CustomPainter {
     path.relativeLineTo(width + _extendedLine * 2, 0);
     path.relativeLineTo(-_extendedLine, 0);
     path.close();
+    // 中垂线
     path.relativeLineTo(0, height);
 
     canvas.drawPath(
@@ -92,22 +93,40 @@ class _CornerTrianglePainter extends CustomPainter {
 
   void _paintCircle(Canvas canvas, double width, double height, double radius) {
     canvas.drawPath(
-      graphical.circlePath(width, height, radius),
+      graphical.circlePath(
+        width: width,
+        height: height,
+        radius: radius,
+      ),
       _paint..color = CupertinoColors.activeGreen,
     );
     canvas.drawPath(
-      graphical.circlePath(width, height, radius, true),
+      graphical.circlePath(
+        width: width,
+        height: height,
+        radius: radius,
+        avoidOffset: true,
+      ),
       _paint..color = CupertinoColors.inactiveGray,
     );
   }
 
   void _paintTriangle(Canvas canvas, double width, double height, double radius) {
     canvas.drawPath(
-      graphical.trianglePath(width, height, radius),
+      graphical.trianglePath(
+        width: width,
+        height: height,
+        radius: radius,
+      ),
       _paint..color = CupertinoColors.systemRed,
     );
     canvas.drawPath(
-      graphical.trianglePath(width, height, radius, true),
+      graphical.trianglePath(
+        width: width,
+        height: height,
+        radius: radius,
+        avoidOffset: true,
+      ),
       _paint..color = CupertinoColors.systemBlue,
     );
   }
