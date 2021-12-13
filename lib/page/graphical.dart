@@ -28,7 +28,7 @@ Path circlePath({
   double? brRadius,
   bool avoidOffset = false,
 }) {
-  final path = cornerPath(
+  return cornerPath(
     width: width,
     height: height,
     radius: radius,
@@ -41,7 +41,6 @@ Path circlePath({
       path.addOval(right.circle);
     },
   );
-  return path.mirrorY(width / 2);
 }
 
 /// 三角形
@@ -53,7 +52,7 @@ Path trianglePath({
   double? brRadius,
   bool avoidOffset = false,
 }) {
-  final path = cornerPath(
+  return cornerPath(
     width: width,
     height: height,
     radius: radius,
@@ -67,10 +66,11 @@ Path trianglePath({
       left.end.arcToPoint(path, radius: Radius.circular(left.radius), clockwise: true);
       right.begin.lineTo(path);
       right.end.arcToPoint(path, radius: Radius.circular(right.radius), clockwise: true);
+      top.end.lineTo(path);
+      top.middle.arcToPoint(path, radius: Radius.circular(top.radius), clockwise: false);
       path.close();
     },
   );
-  return path.mirrorY(width / 2);
 }
 
 /// 创建各个角
