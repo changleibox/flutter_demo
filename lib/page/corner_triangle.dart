@@ -34,7 +34,6 @@ class CornerTriangle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InteractiveViewer(
-      alignPanAxis: true,
       panEnabled: true,
       scaleEnabled: true,
       constrained: true,
