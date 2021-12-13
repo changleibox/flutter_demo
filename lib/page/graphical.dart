@@ -83,6 +83,10 @@ Path cornerPath({
   bool avoidOffset = false,
   void Function(Path path, Incircle top, Incircle left, Incircle right)? visitor,
 }) {
+  final path = Path();
+  if (width <= 0 || height <= 0 || width.isInfinite || height.isInfinite) {
+    return path;
+  }
   final size = Size(width, height);
   final topRadius = radius;
   final leftRadius = blRadius ?? radius;
@@ -102,7 +106,6 @@ Path cornerPath({
   final rightOffset = Offset(width, height);
   final right = Incircle.fromRadians(rightRadians, rightRadius).rotationZ(rightRotation).shift(rightOffset);
 
-  final path = Path();
   visitor?.call(path, top, left, right);
   return path;
 }
